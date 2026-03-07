@@ -24,83 +24,86 @@ from main import (
 )
 
 
-def expr_to_python(expr: Expr) -> str:
+def expr_to_cpp(expr: Expr) -> str:
     if isinstance(expr, Identifier):
         return expr.name
 
     if isinstance(expr, Literal):
         if expr.kind == "BOOL_LIT":
-            return "True" if expr.value == "true" else "False"
+            return "true" if expr.value == "true" else "false"
         return expr.value
 
     if isinstance(expr, BinaryOp):
-        left = expr_to_python(expr.left)
-        right = expr_to_python(expr.right)
+        left = expr_to_cpp(expr.left)
+        right = expr_to_cpp(expr.right)
         return f"({left} {expr.op} {right})"
 
     if isinstance(expr, InputExpr):
         if expr.prompt is None:
-            return "input()"
-        return f"input({expr_to_python(expr.prompt)})"
+            return "elokano_input()"
+        return f"elokano_input({expr_to_cpp(expr.prompt)})"
 
     raise ValueError(f"Unhandled expression type: {type(expr)}")
 
 
-def coerce_expr(var_type: str, expr_code: str) -> str:
-    if var_type == TYPE_INT:
-        return f"int({expr_code})"
-    if var_type == TYPE_FLOAT:
-        return f"float({expr_code})"
-    if var_type == TYPE_STRING:
-        return f"str({expr_code})"
-    if var_type == TYPE_BOOL:
-        return f"_elokano_to_bool({expr_code})"
-    return expr_code
+def elokano_type_to_cpp(elokano_type: str) -> str:
+    if elokano_type == TYPE_INT:
+        return "int"
+    if elokano_type == TYPE_FLOAT:
+        return "double"
+    if elokano_type == TYPE_STRING:
+        return "std::string"
+    if elokano_type == TYPE_BOOL:
+        return "bool"
+    raise ValueError(f"Unknown type: {elokano_type}")
 
 
-def generate_python(statements: List[Declaration | Assignment | Output]) -> str:
-    lines = ["# Auto-generated from .elokano source"]
+def generate_cpp(statements: List[Declaration | Assignment | Output]) -> str:
+    lines = [
+        "// Auto-generated from .elokano source",
+        "#include <iostream>",
+        "#include <string>",
+        "",
+        "std::string elokano_input(const std::string& prompt = \"\") {",
+        "    if (!prompt.empty()) {",
+        "        std::cout << prompt;",
+        "    }",
+        "    std::string line;",
+        "    std::getline(std::cin, line);",
+        "    return line;",
+        "}",
+        "",
+        "int main() {",
+    ]
+
     symbol_types: Dict[str, str] = {}
-    needs_bool_helper = False
 
     for stmt in statements:
         if isinstance(stmt, Declaration):
-            expr_code = expr_to_python(stmt.expr)
-            lines.append(f"{stmt.name} = {coerce_expr(stmt.var_type, expr_code)}")
+            cpp_type = elokano_type_to_cpp(stmt.var_type)
+            expr_code = expr_to_cpp(stmt.expr)
+            lines.append(f"    {cpp_type} {stmt.name} = {expr_code};")
             symbol_types[stmt.name] = stmt.var_type
-            if stmt.var_type == TYPE_BOOL:
-                needs_bool_helper = True
             continue
 
         if isinstance(stmt, Assignment):
-            var_type = symbol_types[stmt.name]
-            expr_code = expr_to_python(stmt.expr)
-            lines.append(f"{stmt.name} = {coerce_expr(var_type, expr_code)}")
-            if var_type == TYPE_BOOL:
-                needs_bool_helper = True
+            # Semantic analysis guarantees variable exists and type compatibility.
+            _ = symbol_types[stmt.name]
+            expr_code = expr_to_cpp(stmt.expr)
+            lines.append(f"    {stmt.name} = {expr_code};")
             continue
 
         if isinstance(stmt, Output):
-            lines.append(f"print({expr_to_python(stmt.expr)})")
+            lines.append(f"    std::cout << {expr_to_cpp(stmt.expr)} << std::endl;")
 
-    if needs_bool_helper:
-        helper_lines = [
-            "",
-            "def _elokano_to_bool(v):",
-            "    if isinstance(v, bool):",
-            "        return v",
-            "    if isinstance(v, str):",
-            "        text = v.strip().lower()",
-            "        if text in {'true', '1', 'yes', 'y', 'on'}:",
-            "            return True",
-            "        if text in {'false', '0', 'no', 'n', 'off'}:",
-            "            return False",
-            "    return bool(v)",
+    lines.extend(
+        [
+            "    return 0;",
+            "}",
             "",
         ]
-        lines = [lines[0], *helper_lines, *lines[1:]]
+    )
 
-    lines.append("")
     return "\n".join(lines)
 
 
@@ -114,30 +117,28 @@ def compile_file(source_path: Path) -> str:
     semantic = SemanticAnalyzer()
     semantic.analyze(statements)
 
-    return generate_python(statements)
+    return generate_cpp(statements)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Generate Python target code from .elokano and run it."
+        description="Generate C++ target code from .elokano source."
     )
     parser.add_argument("source", nargs="?", default="test.elokano")
-    parser.add_argument("--out", default="generated_target.py")
+    parser.add_argument("--out", default="generated_target.cpp")
     args = parser.parse_args()
 
     source_path = Path(args.source)
     if not source_path.exists():
         raise FileNotFoundError(f"Source file not found: {source_path}")
 
-    python_code = compile_file(source_path)
+    cpp_code = compile_file(source_path)
     out_path = Path(args.out)
-    out_path.write_text(python_code, encoding="utf-8")
+    out_path.write_text(cpp_code, encoding="utf-8")
 
-    print(f"Generated Python code: {out_path}")
+    print(f"Generated C++ code: {out_path}")
     print("\n--- Generated Code ---")
-    print(python_code, end="")
-    print("--- Program Output ---")
-    exec(python_code, {})
+    print(cpp_code, end="")
 
 
 if __name__ == "__main__":

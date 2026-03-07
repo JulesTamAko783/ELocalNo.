@@ -1,10 +1,10 @@
-# Elokano Language Prototype
+﻿# Elokano Language Prototype
 
 Small compiler pipeline for a custom `.elokano` language:
 - lexical analysis (tokenization)
 - syntax analysis (parsing)
 - semantic analysis (type and symbol checks)
-- target code generation to Python
+- target code generation to C++
 - one-command run flow (`coderun`)
 
 ## 1. Language Reference
@@ -65,37 +65,42 @@ Each statement must end with `;`.
   - Lexer, parser, and semantic analyzer.
   - Runs an internal sample program.
 - `elokano_codegen.py`
-  - Compiles `.elokano` source to Python target code.
-  - Can generate and execute output.
+  - Compiles `.elokano` source into C++ target code.
 - `coderun.py`
-  - Recommended runner: compile then execute in one command.
+  - Recommended runner: generate C++, compile, then execute.
+  - Looks for `g++`, `clang++`, or `cl`.
 - `coderun.ps1`
   - PowerShell wrapper for `coderun.py`.
 - `test.elokano`
   - Example source file.
-- `generated_target.py`
-  - Auto-generated Python output (overwritten on each run).
+- `generated_target.cpp`
+  - Auto-generated C++ output (overwritten on each run).
+- `generated_target.exe`
+  - Compiled executable output (overwritten on each run).
 
-## 5. How To Run
+## 5. Requirements
 
-Prerequisite: Python 3.x installed.
+- Python 3.x
+- C++ compiler (`g++` or `clang++` or `cl`)
 
-### 5.1 Validate Lexer + Parser + Semantic Analyzer
+## 6. How To Run
+
+### 6.1 Validate Lexer + Parser + Semantic Analyzer
 
 ```powershell
 python main.py
 ```
 
-### 5.2 Compile and Run with Codegen Script
+### 6.2 Generate C++ Code Only
 
 ```powershell
-python elokano_codegen.py test.elokano
+python elokano_codegen.py test.elokano --out generated_target.cpp
 ```
 
-### 5.3 Run with Coderun (Recommended)
+### 6.3 Run with Coderun (Recommended)
 
 ```powershell
-python coderun.py test.elokano
+python coderun.py test.elokano --out generated_target.cpp --exe generated_target.exe
 ```
 
 PowerShell wrapper:
@@ -104,7 +109,7 @@ PowerShell wrapper:
 .\coderun.ps1 test.elokano
 ```
 
-## 6. Input (`Awat`) Usage
+## 7. Input (`Awat`) Usage
 
 Interactive:
 
@@ -112,13 +117,7 @@ Interactive:
 python coderun.py test.elokano
 ```
 
-Piped input example (first prompt gets this value):
-
-```powershell
-"Jules" | python coderun.py test.elokano
-```
-
-For multiple `Awat(...)` calls, provide multiple lines:
+Piped multi-line input example (for multiple `Awat(...)` calls):
 
 ```powershell
 @"
@@ -129,7 +128,7 @@ Ana
 "@ | python coderun.py test.elokano
 ```
 
-## 7. Example Program
+## 8. Example Program
 
 ```text
 Sarsarita ngalan := Awat("Nagan mu: ");
@@ -144,7 +143,7 @@ Ibaga "Nagan mo ay " + ngalan + " anak ni " + mom + " at " + dad + " kapatid ni 
 Ibaga result;
 ```
 
-## 8. Common Semantic Errors
+## 9. Common Semantic Errors
 
 - `Variable 'x' is not declared`
   - Declare it first: `Bilang x := 0;`
