@@ -90,13 +90,13 @@ class Lexer:
         "Sarsarita": "TYPE_STRING",
         "Pudno": "TYPE_BOOL",
         "Ibaga": "OUTPUT",
-        "Awat": "INPUT",
+        "Ikabil": "INPUT",
         "true": "BOOL_LIT",
         "false": "BOOL_LIT",
     }
 
     TOKEN_SPEC = [
-        ("ASSIGN", r":="),
+        ("ASSIGN", r"dutokan->"),
         ("SEMI", r";"),
         ("LPAREN", r"\("),
         ("RPAREN", r"\)"),
@@ -329,7 +329,7 @@ class SemanticAnalyzer:
             if expr.prompt is not None:
                 prompt_type = self.infer_expr_type(expr.prompt)
                 if prompt_type != TYPE_STRING:
-                    self.error(expr.token, f"Awat prompt must be {TYPE_STRING}, got {prompt_type}")
+                    self.error(expr.token, f"Ikabil prompt must be {TYPE_STRING}, got {prompt_type}")
             return TYPE_STRING
 
         if isinstance(expr, BinaryOp):
@@ -389,11 +389,11 @@ def print_tokens(tokens: List[Token]) -> None:
 
 def main() -> None:
     sample_program = '''
-Bilang x := 10;
-Bilang y := 20;
-Gudua avg := (x + y) / 2;
-Sarsarita name := "Jules";
-Pudno active := true;
+Bilang x dutokan-> 10;
+Bilang y dutokan-> 20;
+Gudua avg dutokan-> (x + y) / 2;
+Sarsarita name dutokan-> "Jules";
+Pudno active dutokan-> true;
 Ibaga "Hello, " + name;
 Ibaga avg;
 '''.strip("\n")
@@ -417,3 +417,4 @@ Ibaga avg;
 
 if __name__ == "__main__":
     main()
+

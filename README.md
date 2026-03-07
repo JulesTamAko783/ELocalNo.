@@ -16,12 +16,12 @@ Small compiler pipeline for a custom `.elokano` language:
 - `Sarsarita` -> string type
 - `Pudno` -> boolean type
 - `Ibaga` -> output
-- `Awat` -> input
+- `Ikabil` -> input
 - `true`, `false` -> boolean literals
 
 ### 1.2 Operators and Delimiters
 
-- `:=` -> assignment
+- `dutokan->` -> assignment
 - `;` -> statement delimiter
 - `(` `)` -> grouping / enclosing delimiters
 - `+` -> addition
@@ -34,16 +34,16 @@ Small compiler pipeline for a custom `.elokano` language:
 Each statement must end with `;`.
 
 ```text
-<program>      := <statement>* EOF
+<program>      ::= <statement>* EOF
 
-<statement>    := <declaration> | <assignment> | <output>
-<declaration>  := (Bilang|Gudua|Sarsarita|Pudno) IDENT := <expr> ;
-<assignment>   := IDENT := <expr> ;
-<output>       := Ibaga <expr> ;
+<statement>    ::= <declaration> | <assignment> | <output>
+<declaration>  ::= (Bilang|Gudua|Sarsarita|Pudno) IDENT dutokan-> <expr> ;
+<assignment>   ::= IDENT dutokan-> <expr> ;
+<output>       ::= Ibaga <expr> ;
 
-<expr>         := <term> ((+|-) <term>)*
-<term>         := <factor> ((*|/) <factor>)*
-<factor>       := (<expr>) | IDENT | INT | FLOAT | STRING | true | false | Awat | Awat(<expr>)
+<expr>         ::= <term> ((+|-) <term>)*
+<term>         ::= <factor> ((*|/) <factor>)*
+<factor>       ::= (<expr>) | IDENT | INT | FLOAT | STRING | true | false | Ikabil | Ikabil(<expr>)
 ```
 
 ## 3. Semantic Rules (Current)
@@ -52,8 +52,8 @@ Each statement must end with `;`.
 - Variable redeclaration is not allowed.
 - Assignment value must match declared variable type.
 - `Gudua` may receive `Bilang` values.
-- `Awat` returns `Sarsarita`.
-- `Awat(prompt)` requires `prompt` to be `Sarsarita`.
+- `Ikabil` returns `Sarsarita`.
+- `Ikabil(prompt)` requires `prompt` to be `Sarsarita`.
 - `+` supports:
   - numeric + numeric
   - `Sarsarita` + `Sarsarita`
@@ -109,7 +109,7 @@ PowerShell wrapper:
 .\coderun.ps1 test.elokano
 ```
 
-## 7. Input (`Awat`) Usage
+## 7. Input (`Ikabil`) Usage
 
 Interactive:
 
@@ -117,7 +117,7 @@ Interactive:
 python coderun.py test.elokano
 ```
 
-Piped multi-line input example (for multiple `Awat(...)` calls):
+Piped multi-line input example (for multiple `Ikabil(...)` calls):
 
 ```powershell
 @"
@@ -131,14 +131,14 @@ Ana
 ## 8. Example Program
 
 ```text
-Sarsarita ngalan := Awat("Nagan mu: ");
-Sarsarita mom := Awat("Nagan ni ina mu: ");
-Sarsarita dad := Awat("Nagan ni ama mu: ");
-Sarsarita sibling := Awat("Nagan ni Ate o Kuya mu: ");
+Sarsarita ngalan dutokan-> Ikabil("Nagan mu: ");
+Sarsarita mom dutokan-> Ikabil("Nagan ni ina mu: ");
+Sarsarita dad dutokan-> Ikabil("Nagan ni ama mu: ");
+Sarsarita sibling dutokan-> Ikabil("Nagan ni Ate o Kuya mu: ");
 
-Bilang x := 10;
-Bilang y := 5;
-Gudua result := ((x + y) * 2) / 3;
+Bilang x dutokan-> 10;
+Bilang y dutokan-> 5;
+Gudua result dutokan-> ((x + y) * 2) / 3;
 Ibaga "Nagan mo ay " + ngalan + " anak ni " + mom + " at " + dad + " kapatid ni " + sibling;
 Ibaga result;
 ```
@@ -146,8 +146,11 @@ Ibaga result;
 ## 9. Common Semantic Errors
 
 - `Variable 'x' is not declared`
-  - Declare it first: `Bilang x := 0;`
+  - Declare it first: `Bilang x dutokan-> 0;`
 - `Variable 'x' already declared`
   - Remove duplicate declaration or rename variable.
 - `Type mismatch in declaration/assignment`
   - Make expression type compatible with variable type.
+
+
+
