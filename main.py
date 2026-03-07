@@ -76,7 +76,8 @@ class Assignment:
 
 @dataclass
 class Output:
-    expr: Expr
+    expr: Optional[Expr]
+    end_expr: Optional[Expr]
     token: Token
 
 
@@ -100,10 +101,13 @@ class Lexer:
         ("SEMI", r";"),
         ("LPAREN", r"\("),
         ("RPAREN", r"\)"),
+        ("COMMA", r","),
         ("PLUS", r"\+"),
         ("MINUS", r"-"),
         ("MUL", r"\*"),
+        ("FLOOR_DIV", r"//"),
         ("DIV", r"/"),
+        ("MOD", r"%"),
         ("FLOAT_LIT", r"\d+\.\d+"),
         ("INT_LIT", r"\d+"),
         ("STRING_LIT", r'"[^"\\]*(?:\\.[^"\\]*)*"'),
@@ -210,8 +214,17 @@ class Parser:
 
     def output_statement(self) -> Output:
         token = self.consume("OUTPUT")
-        expr = self.expression()
-        return Output(expr=expr, token=token)
+        expr: Optional[Expr] = None
+        end_expr: Optional[Expr] = None
+
+        self.consume("LPAREN")
+        if self.current().type != "RPAREN":
+            expr = self.expression()
+            if self.match("COMMA"):
+                end_expr = self.expression()
+        self.consume("RPAREN")
+
+        return Output(expr=expr, end_expr=end_expr, token=token)
 
     def expression(self) -> Expr:
         return self.addition()
@@ -226,7 +239,7 @@ class Parser:
 
     def multiplication(self) -> Expr:
         node = self.factor()
-        while self.current().type in {"MUL", "DIV"}:
+        while self.current().type in {"MUL", "DIV", "FLOOR_DIV", "MOD"}:
             op_token = self.current()
             self.pos += 1
             node = BinaryOp(left=node, op=op_token.value, right=self.factor(), token=op_token)
@@ -280,7 +293,15 @@ class SemanticAnalyzer:
             elif isinstance(statement, Assignment):
                 self.analyze_assignment(statement)
             elif isinstance(statement, Output):
-                self.infer_expr_type(statement.expr)
+                if statement.expr is not None:
+                    self.infer_expr_type(statement.expr)
+                if statement.end_expr is not None:
+                    end_type = self.infer_expr_type(statement.end_expr)
+                    if end_type != TYPE_STRING:
+                        self.error(
+                            statement.token,
+                            f"Ibaga end argument must be {TYPE_STRING}, got {end_type}",
+                        )
 
     def analyze_declaration(self, statement: Declaration) -> None:
         if statement.name in self.symbols:
@@ -356,10 +377,22 @@ class SemanticAnalyzer:
                         expr.token,
                         f"Operator '{op}' requires numeric operands (got {left_type} and {right_type})",
                     )
+                if op == "/" and self.is_zero_numeric_literal(expr.right):
+                    self.error(expr.token, "Division by zero is not allowed")
                 if op == "/":
                     return TYPE_FLOAT
                 if TYPE_FLOAT in {left_type, right_type}:
                     return TYPE_FLOAT
+                return TYPE_INT
+
+            if op in {"//", "%"}:
+                if left_type != TYPE_INT or right_type != TYPE_INT:
+                    self.error(
+                        expr.token,
+                        f"Operator '{op}' requires {TYPE_INT} operands (got {left_type} and {right_type})",
+                    )
+                if self.is_zero_int_literal(expr.right):
+                    self.error(expr.token, f"Operator '{op}' with zero divisor is not allowed")
                 return TYPE_INT
 
             self.error(expr.token, f"Unknown operator {op!r}")
@@ -377,6 +410,20 @@ class SemanticAnalyzer:
         return target_type == TYPE_FLOAT and value_type == TYPE_INT
 
     @staticmethod
+    def is_zero_numeric_literal(expr: Expr) -> bool:
+        if not isinstance(expr, Literal):
+            return False
+        if expr.kind == "INT_LIT":
+            return int(expr.value) == 0
+        if expr.kind == "FLOAT_LIT":
+            return float(expr.value) == 0.0
+        return False
+
+    @staticmethod
+    def is_zero_int_literal(expr: Expr) -> bool:
+        return isinstance(expr, Literal) and expr.kind == "INT_LIT" and int(expr.value) == 0
+
+    @staticmethod
     def error(token: Token, message: str) -> None:
         raise SemanticError(f"{message} at line {token.line}, column {token.column}")
 
@@ -392,10 +439,16 @@ def main() -> None:
 Bilang x dutokan-> 10;
 Bilang y dutokan-> 20;
 Gudua avg dutokan-> (x + y) / 2;
+Bilang quotient dutokan-> y // 3;
+Bilang rem dutokan-> y % 3;
 Sarsarita name dutokan-> "Jules";
 Pudno active dutokan-> true;
-Ibaga "Hello, " + name;
-Ibaga avg;
+Ibaga("Hello, " + name, "\n");
+Ibaga("avg=\t", "");
+Ibaga(avg);
+Ibaga("quotient=\t", "");
+Ibaga(quotient, "\t");
+Ibaga(rem);
 '''.strip("\n")
 
     lexer = Lexer(sample_program)

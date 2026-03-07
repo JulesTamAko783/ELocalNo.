@@ -6,7 +6,12 @@ Sarsarita sibling dutokan-> Ikabil("Nagan ni Ate o Kuya mu: ");
 Bilang x dutokan-> 10;
 Bilang y dutokan-> 5;
 Gudua result dutokan-> ((x + y) * 2) / 3;
-Ibaga "Nagan mo ay " + ngalan + " anak ni " + mom + " at " + dad + " kapatid ni " + sibling;
-Ibaga result;
+Bilang quotient dutokan-> y // 2;
+Bilang rem dutokan-> y % 2;
 
-
+Ibaga("Nagan mo ay " + ngalan + " anak ni " + mom + " at " + dad + " kapatid ni " + sibling, "\n");
+Ibaga("result:\t", "");
+Ibaga(result);
+Ibaga("quotient:\t", "");
+Ibaga(quotient, "\t");
+Ibaga(rem, "\n");

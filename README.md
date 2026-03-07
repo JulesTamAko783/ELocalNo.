@@ -27,7 +27,9 @@ Small compiler pipeline for a custom `.elokano` language:
 - `+` -> addition
 - `-` -> subtraction
 - `*` -> multiplication
-- `/` -> division
+- `/` -> floating-point division
+- `//` -> floor/integer division
+- `%` -> modulo/remainder
 
 ## 2. Grammar (Current)
 
@@ -39,10 +41,12 @@ Each statement must end with `;`.
 <statement>    ::= <declaration> | <assignment> | <output>
 <declaration>  ::= (Bilang|Gudua|Sarsarita|Pudno) IDENT dutokan-> <expr> ;
 <assignment>   ::= IDENT dutokan-> <expr> ;
-<output>       ::= Ibaga <expr> ;
+<output>       ::= Ibaga() ;
+                | Ibaga(<expr>) ;
+                | Ibaga(<expr>, <end_expr>) ;
 
 <expr>         ::= <term> ((+|-) <term>)*
-<term>         ::= <factor> ((*|/) <factor>)*
+<term>         ::= <factor> ((*|/|//|%) <factor>)*
 <factor>       ::= (<expr>) | IDENT | INT | FLOAT | STRING | true | false | Ikabil | Ikabil(<expr>)
 ```
 
@@ -54,10 +58,23 @@ Each statement must end with `;`.
 - `Gudua` may receive `Bilang` values.
 - `Ikabil` returns `Sarsarita`.
 - `Ikabil(prompt)` requires `prompt` to be `Sarsarita`.
+- `Ibaga(...)` must use parentheses.
+- `Ibaga(expr)` prints with a newline by default.
+- `Ibaga(expr, end)` prints using `end` instead of default newline.
+  - `end` must be `Sarsarita`.
+  - escape sequences in strings are supported (e.g., `"\n"`, `"\t"`).
+- `Ibaga()` prints a blank newline.
 - `+` supports:
   - numeric + numeric
   - `Sarsarita` + `Sarsarita`
-- `-`, `*`, `/` require numeric operands.
+- `-` and `*` require numeric operands.
+- `/` requires numeric operands and returns `Gudua` (floating-point division).
+- `//` requires `Bilang` operands and returns `Bilang`.
+- `%` requires `Bilang` operands and returns `Bilang`.
+- Literal zero divisors are rejected by semantic analysis:
+  - `a / 0`, `a / 0.0`
+  - `a // 0`
+  - `a % 0`
 
 ## 4. Project Files
 
@@ -109,6 +126,20 @@ PowerShell wrapper:
 .\coderun.ps1 test.elokano
 ```
 
+### 6.4 Simple Command (`elocalno run`)
+
+Command:
+
+```powershell
+elocalno run test.elokano
+```
+
+If PowerShell does not find `elocalno`, add this project folder to `PATH` for the current terminal session:
+
+```powershell
+$env:PATH = "$PWD;$env:PATH"
+```
+
 ## 7. Input (`Ikabil`) Usage
 
 Interactive:
@@ -139,8 +170,14 @@ Sarsarita sibling dutokan-> Ikabil("Nagan ni Ate o Kuya mu: ");
 Bilang x dutokan-> 10;
 Bilang y dutokan-> 5;
 Gudua result dutokan-> ((x + y) * 2) / 3;
-Ibaga "Nagan mo ay " + ngalan + " anak ni " + mom + " at " + dad + " kapatid ni " + sibling;
-Ibaga result;
+Bilang quotient dutokan-> y // 2;
+Bilang rem dutokan-> y % 2;
+Ibaga("Nagan mo ay " + ngalan + " anak ni " + mom + " at " + dad + " kapatid ni " + sibling, "\n");
+Ibaga("result:\t", "");
+Ibaga(result);
+Ibaga("quotient:\t", "");
+Ibaga(quotient, "\t");
+Ibaga(rem, "\n");
 ```
 
 ## 9. Common Semantic Errors
@@ -151,6 +188,8 @@ Ibaga result;
   - Remove duplicate declaration or rename variable.
 - `Type mismatch in declaration/assignment`
   - Make expression type compatible with variable type.
+- `Division by zero is not allowed`
+  - Change the right-hand divisor from `0`/`0.0` to a non-zero value.
 
 
 

@@ -1,6 +1,6 @@
 ﻿import argparse
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from main import (
     Assignment,
@@ -36,6 +36,10 @@ def expr_to_cpp(expr: Expr) -> str:
     if isinstance(expr, BinaryOp):
         left = expr_to_cpp(expr.left)
         right = expr_to_cpp(expr.right)
+        if expr.op == "/":
+            return f"(static_cast<double>({left}) / static_cast<double>({right}))"
+        if expr.op == "//":
+            return f"({left} / {right})"
         return f"({left} {expr.op} {right})"
 
     if isinstance(expr, InputExpr):
@@ -62,6 +66,8 @@ def generate_cpp(statements: List[Declaration | Assignment | Output]) -> str:
     lines = [
         "// Auto-generated from .elokano source",
         "#include <iostream>",
+        "#include <iomanip>",
+        "#include <sstream>",
         "#include <string>",
         "",
         "std::string elokano_input(const std::string& prompt = \"\") {",
@@ -71,6 +77,33 @@ def generate_cpp(statements: List[Declaration | Assignment | Output]) -> str:
         "    std::string line;",
         "    std::getline(std::cin, line);",
         "    return line;",
+        "}",
+        "",
+        "std::string elokano_format_double(double value) {",
+        "    std::ostringstream oss;",
+        "    oss << std::setprecision(15) << std::defaultfloat << value;",
+        "    std::string text = oss.str();",
+        "    if (text.find('.') == std::string::npos && text.find('e') == std::string::npos && text.find('E') == std::string::npos) {",
+        "        text += \".0\";",
+        "    }",
+        "    return text;",
+        "}",
+        "",
+        "void elokano_print() {",
+        "    std::cout << std::endl;",
+        "}",
+        "",
+        "void elokano_print(double value, const std::string& end = \"\\n\") {",
+        "    std::cout << elokano_format_double(value) << end;",
+        "}",
+        "",
+        "void elokano_print(bool value, const std::string& end = \"\\n\") {",
+        "    std::cout << (value ? \"True\" : \"False\") << end;",
+        "}",
+        "",
+        "template <typename T>",
+        "void elokano_print(const T& value, const std::string& end = \"\\n\") {",
+        "    std::cout << value << end;",
         "}",
         "",
         "int main() {",
@@ -94,7 +127,22 @@ def generate_cpp(statements: List[Declaration | Assignment | Output]) -> str:
             continue
 
         if isinstance(stmt, Output):
-            lines.append(f"    std::cout << {expr_to_cpp(stmt.expr)} << std::endl;")
+            value_code: Optional[str] = None
+            end_code: Optional[str] = None
+
+            if stmt.expr is not None:
+                value_code = expr_to_cpp(stmt.expr)
+            if stmt.end_expr is not None:
+                end_code = expr_to_cpp(stmt.end_expr)
+
+            if value_code is None and end_code is None:
+                lines.append("    elokano_print();")
+            elif value_code is None and end_code is not None:
+                lines.append(f"    std::cout << {end_code};")
+            elif value_code is not None and end_code is None:
+                lines.append(f"    elokano_print({value_code});")
+            else:
+                lines.append(f"    elokano_print({value_code}, {end_code});")
 
     lines.extend(
         [
