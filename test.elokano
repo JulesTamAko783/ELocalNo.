@@ -2,9 +2,10 @@
 Sarsarita mom := Awat("Nagan ni ina mu: ");
 Sarsarita dad := Awat("Nagan ni ama mu: ");
 Sarsarita sibling := Awat("Nagan ni Ate o Kuya mu: "); 
-Sarsarita test := 5;
+
 Bilang x := 10;
 Bilang y := 5;
 Gudua result := ((x + y) * 2) / 3;
 Ibaga "Nagan mo ay " + ngalan + " anak ni " + mom + " at " + dad + " kapatid ni " + sibling;
 Ibaga result;
+
