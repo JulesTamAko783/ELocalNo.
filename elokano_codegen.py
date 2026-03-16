@@ -1,4 +1,4 @@
-﻿import argparse
+import argparse
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -6,8 +6,10 @@ from main import (
     Assignment,
     BinaryOp,
     Declaration,
+    ElifBranch,
     Expr,
     Identifier,
+    IfStatement,
     InputExpr,
     Lexer,
     LexerError,
@@ -17,6 +19,7 @@ from main import (
     ParserError,
     SemanticAnalyzer,
     SemanticError,
+    Statement,
     TYPE_BOOL,
     TYPE_FLOAT,
     TYPE_INT,
@@ -62,7 +65,73 @@ def elokano_type_to_cpp(elokano_type: str) -> str:
     raise ValueError(f"Unknown type: {elokano_type}")
 
 
-def generate_cpp(statements: List[Declaration | Assignment | Output]) -> str:
+def default_cpp_value(elokano_type: str) -> str:
+    if elokano_type == TYPE_INT:
+        return "0"
+    if elokano_type == TYPE_FLOAT:
+        return "0.0"
+    if elokano_type == TYPE_STRING:
+        return '""'
+    if elokano_type == TYPE_BOOL:
+        return "false"
+    raise ValueError(f"Unknown type: {elokano_type}")
+
+
+def generate_statements(
+    statements: List[Statement],
+    symbol_types: Dict[str, str],
+    lines: List[str],
+    indent: int = 1,
+) -> None:
+    prefix = "    " * indent
+    for stmt in statements:
+        if isinstance(stmt, Declaration):
+            cpp_type = elokano_type_to_cpp(stmt.var_type)
+            if stmt.expr is not None:
+                expr_code = expr_to_cpp(stmt.expr)
+            else:
+                expr_code = default_cpp_value(stmt.var_type)
+            lines.append(f"{prefix}{cpp_type} {stmt.name} = {expr_code};")
+            symbol_types[stmt.name] = stmt.var_type
+            continue
+
+        if isinstance(stmt, Assignment):
+            expr_code = expr_to_cpp(stmt.expr)
+            lines.append(f"{prefix}{stmt.name} = {expr_code};")
+            continue
+
+        if isinstance(stmt, Output):
+            value_code: Optional[str] = None
+            end_code: Optional[str] = None
+
+            if stmt.expr is not None:
+                value_code = expr_to_cpp(stmt.expr)
+            if stmt.end_expr is not None:
+                end_code = expr_to_cpp(stmt.end_expr)
+
+            if value_code is None and end_code is None:
+                lines.append(f"{prefix}elokano_print();")
+            elif value_code is None and end_code is not None:
+                lines.append(f"{prefix}std::cout << {end_code};")
+            elif value_code is not None and end_code is None:
+                lines.append(f"{prefix}elokano_print({value_code});")
+            else:
+                lines.append(f"{prefix}elokano_print({value_code}, {end_code});")
+            continue
+
+        if isinstance(stmt, IfStatement):
+            lines.append(f"{prefix}if ({expr_to_cpp(stmt.condition)}) {{")
+            generate_statements(stmt.body, symbol_types, lines, indent + 1)
+            for elif_branch in stmt.elif_branches:
+                lines.append(f"{prefix}}} else if ({expr_to_cpp(elif_branch.condition)}) {{")
+                generate_statements(elif_branch.body, symbol_types, lines, indent + 1)
+            if stmt.else_body is not None:
+                lines.append(f"{prefix}}} else {{")
+                generate_statements(stmt.else_body, symbol_types, lines, indent + 1)
+            lines.append(f"{prefix}}}")
+
+
+def generate_cpp(statements: List[Statement]) -> str:
     lines = [
         "// Auto-generated from .elokano source",
         "#include <iostream>",
@@ -110,39 +179,7 @@ def generate_cpp(statements: List[Declaration | Assignment | Output]) -> str:
     ]
 
     symbol_types: Dict[str, str] = {}
-
-    for stmt in statements:
-        if isinstance(stmt, Declaration):
-            cpp_type = elokano_type_to_cpp(stmt.var_type)
-            expr_code = expr_to_cpp(stmt.expr)
-            lines.append(f"    {cpp_type} {stmt.name} = {expr_code};")
-            symbol_types[stmt.name] = stmt.var_type
-            continue
-
-        if isinstance(stmt, Assignment):
-            # Semantic analysis guarantees variable exists and type compatibility.
-            _ = symbol_types[stmt.name]
-            expr_code = expr_to_cpp(stmt.expr)
-            lines.append(f"    {stmt.name} = {expr_code};")
-            continue
-
-        if isinstance(stmt, Output):
-            value_code: Optional[str] = None
-            end_code: Optional[str] = None
-
-            if stmt.expr is not None:
-                value_code = expr_to_cpp(stmt.expr)
-            if stmt.end_expr is not None:
-                end_code = expr_to_cpp(stmt.end_expr)
-
-            if value_code is None and end_code is None:
-                lines.append("    elokano_print();")
-            elif value_code is None and end_code is not None:
-                lines.append(f"    std::cout << {end_code};")
-            elif value_code is not None and end_code is None:
-                lines.append(f"    elokano_print({value_code});")
-            else:
-                lines.append(f"    elokano_print({value_code}, {end_code});")
+    generate_statements(statements, symbol_types, lines)
 
     lines.extend(
         [

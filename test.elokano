@@ -1,10 +1,10 @@
-﻿Sarsarita ngalan dutokan-> Ikabil("Nagan mu: ");
+Sarsarita ngalan dutokan-> Ikabil("Nagan mu: ");
 Sarsarita mom dutokan-> Ikabil("Nagan ni ina mu: ");
 Sarsarita dad dutokan-> Ikabil("Nagan ni ama mu: ");
 Sarsarita sibling dutokan-> Ikabil("Nagan ni Ate o Kuya mu: ");
 
-Bilang x dutokan-> 10;
-Bilang y dutokan-> 5;
+Bilang x dutokan-> 10, y dutokan-> 5, z;
+z dutokan-> 69;
 Gudua result dutokan-> ((x + y) * 2) / 3;
 Bilang quotient dutokan-> y // 2;
 Bilang rem dutokan-> y % 2;
@@ -15,3 +15,14 @@ Ibaga(result);
 Ibaga("quotient:\t", "");
 Ibaga(quotient, "\t");
 Ibaga(rem, "\n");
+
+nu (x > y) {
+    Ibaga("x is greater than y, z is equal to ", "");
+    Ibaga(z);
+}
+sabali nu (x == y) {
+    Ibaga("x is equal to y");
+}
+sabali {
+    Ibaga("x is less than or equal to y");
+}

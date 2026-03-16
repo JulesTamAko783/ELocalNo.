@@ -47,6 +47,8 @@ int main() {
     std::string sibling = elokano_input("Nagan ni Ate o Kuya mu: ");
     int x = 10;
     int y = 5;
+    int z = 0;
+    z = 69;
     double result = (static_cast<double>(((x + y) * 2)) / static_cast<double>(3));
     int quotient = (y / 2);
     int rem = (y % 2);
@@ -56,5 +58,13 @@ int main() {
     elokano_print("quotient:\t", "");
     elokano_print(quotient, "\t");
     elokano_print(rem, "\n");
+    if ((x > y)) {
+        elokano_print("x is greater than y, z is equal to ", "");
+        elokano_print(z);
+    } else if ((x == y)) {
+        elokano_print("x is equal to y");
+    } else {
+        elokano_print("x is less than or equal to y");
+    }
     return 0;
 }

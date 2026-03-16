@@ -1,4 +1,4 @@
-﻿import re
+import re
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Union
 
@@ -63,7 +63,7 @@ Expr = Union[Literal, Identifier, BinaryOp, InputExpr]
 class Declaration:
     var_type: str
     name: str
-    expr: Expr
+    expr: Optional[Expr]
     token: Token
 
 
@@ -81,7 +81,31 @@ class Output:
     token: Token
 
 
-Statement = Union[Declaration, Assignment, Output]
+@dataclass
+class ElifBranch:
+    condition: Expr
+    body: List["Statement"]
+    token: Token
+
+
+@dataclass
+class IfStatement:
+    condition: Expr
+    body: List["Statement"]
+    elif_branches: List[ElifBranch]
+    else_body: Optional[List["Statement"]]
+    token: Token
+
+
+Statement = Union[Declaration, Assignment, Output, IfStatement]
+
+
+@dataclass
+class SymbolEntry:
+    name: str
+    var_type: str
+    line: int
+    column: int
 
 
 class Lexer:
@@ -92,6 +116,8 @@ class Lexer:
         "Pudno": "TYPE_BOOL",
         "Ibaga": "OUTPUT",
         "Ikabil": "INPUT",
+        "nu": "IF",
+        "sabali": "ELSE",
         "true": "BOOL_LIT",
         "false": "BOOL_LIT",
     }
@@ -101,6 +127,8 @@ class Lexer:
         ("SEMI", r";"),
         ("LPAREN", r"\("),
         ("RPAREN", r"\)"),
+        ("LBRACE", r"\{"),
+        ("RBRACE", r"\}"),
         ("COMMA", r","),
         ("PLUS", r"\+"),
         ("MINUS", r"-"),
@@ -108,6 +136,12 @@ class Lexer:
         ("FLOOR_DIV", r"//"),
         ("DIV", r"/"),
         ("MOD", r"%"),
+        ("GE", r">="),
+        ("LE", r"<="),
+        ("NE", r"!="),
+        ("EQ", r"=="),
+        ("GT", r">"),
+        ("LT", r"<"),
         ("FLOAT_LIT", r"\d+\.\d+"),
         ("INT_LIT", r"\d+"),
         ("STRING_LIT", r'"[^"\\]*(?:\\.[^"\\]*)*"'),
@@ -177,19 +211,34 @@ class Parser:
         return False
 
     def parse(self) -> List[Statement]:
-        statements: List[Statement] = []
-        while self.current().type != "EOF":
-            statements.append(self.statement())
-            self.consume("SEMI")
-            while self.match("SEMI"):
-                pass
+        statements = self.statement_list("EOF")
         self.consume("EOF")
         return statements
 
+    def statement_list(self, until: str) -> List[Statement]:
+        statements: List[Statement] = []
+        while self.current().type != until:
+            token = self.current()
+            if token.type in {"TYPE_INT", "TYPE_FLOAT", "TYPE_STRING", "TYPE_BOOL"}:
+                statements.extend(self.declaration())
+                self.consume("SEMI")
+            elif token.type == "IF":
+                statements.append(self.if_statement())
+            else:
+                statements.append(self.statement())
+                self.consume("SEMI")
+            while self.match("SEMI"):
+                pass
+        return statements
+
+    def parse_block(self) -> List[Statement]:
+        self.consume("LBRACE")
+        stmts = self.statement_list("RBRACE")
+        self.consume("RBRACE")
+        return stmts
+
     def statement(self) -> Statement:
         token = self.current()
-        if token.type in {"TYPE_INT", "TYPE_FLOAT", "TYPE_STRING", "TYPE_BOOL"}:
-            return self.declaration()
         if token.type == "OUTPUT":
             return self.output_statement()
         if token.type == "IDENT":
@@ -198,13 +247,54 @@ class Parser:
             f"Invalid statement start {token.value!r} at line {token.line}, column {token.column}"
         )
 
-    def declaration(self) -> Declaration:
+    def declaration(self) -> List[Declaration]:
         type_token = self.current()
         self.pos += 1
+        declarations: List[Declaration] = []
         name_token = self.consume("IDENT")
-        self.consume("ASSIGN")
-        expr = self.expression()
-        return Declaration(var_type=type_token.value, name=name_token.value, expr=expr, token=type_token)
+        expr: Optional[Expr] = None
+        if self.current().type == "ASSIGN":
+            self.consume("ASSIGN")
+            expr = self.expression()
+        declarations.append(
+            Declaration(var_type=type_token.value, name=name_token.value, expr=expr, token=type_token)
+        )
+        while self.match("COMMA"):
+            name_token = self.consume("IDENT")
+            expr = None
+            if self.current().type == "ASSIGN":
+                self.consume("ASSIGN")
+                expr = self.expression()
+            declarations.append(
+                Declaration(var_type=type_token.value, name=name_token.value, expr=expr, token=type_token)
+            )
+        return declarations
+
+    def if_statement(self) -> IfStatement:
+        token = self.consume("IF")
+        self.consume("LPAREN")
+        condition = self.expression()
+        self.consume("RPAREN")
+        body = self.parse_block()
+        elif_branches: List[ElifBranch] = []
+        else_body: Optional[List[Statement]] = None
+        while self.current().type == "ELSE":
+            else_token = self.current()
+            self.pos += 1
+            if self.current().type == "IF":
+                self.pos += 1
+                self.consume("LPAREN")
+                elif_cond = self.expression()
+                self.consume("RPAREN")
+                elif_body = self.parse_block()
+                elif_branches.append(ElifBranch(condition=elif_cond, body=elif_body, token=else_token))
+            else:
+                else_body = self.parse_block()
+                break
+        return IfStatement(
+            condition=condition, body=body, elif_branches=elif_branches,
+            else_body=else_body, token=token,
+        )
 
     def assignment(self) -> Assignment:
         name_token = self.consume("IDENT")
@@ -227,7 +317,15 @@ class Parser:
         return Output(expr=expr, end_expr=end_expr, token=token)
 
     def expression(self) -> Expr:
-        return self.addition()
+        return self.comparison()
+
+    def comparison(self) -> Expr:
+        node = self.addition()
+        while self.current().type in {"GT", "LT", "GE", "LE", "EQ", "NE"}:
+            op_token = self.current()
+            self.pos += 1
+            node = BinaryOp(left=node, op=op_token.value, right=self.addition(), token=op_token)
+        return node
 
     def addition(self) -> Expr:
         node = self.multiplication()
@@ -285,6 +383,7 @@ class Parser:
 class SemanticAnalyzer:
     def __init__(self):
         self.symbols: Dict[str, str] = {}
+        self.symbol_table: List[SymbolEntry] = []
 
     def analyze(self, statements: List[Statement]) -> None:
         for statement in statements:
@@ -302,20 +401,29 @@ class SemanticAnalyzer:
                             statement.token,
                             f"Ibaga end argument must be {TYPE_STRING}, got {end_type}",
                         )
+            elif isinstance(statement, IfStatement):
+                self.analyze_if_statement(statement)
 
     def analyze_declaration(self, statement: Declaration) -> None:
         if statement.name in self.symbols:
             self.error(statement.token, f"Variable {statement.name!r} already declared")
 
-        expr_type = self.infer_expr_type(statement.expr)
-        if not self.is_assignable(statement.var_type, expr_type):
-            self.error(
-                statement.token,
-                f"Type mismatch in declaration of {statement.name!r}: "
-                f"expected {statement.var_type}, got {expr_type}",
-            )
+        if statement.expr is not None:
+            expr_type = self.infer_expr_type(statement.expr)
+            if not self.is_assignable(statement.var_type, expr_type):
+                self.error(
+                    statement.token,
+                    f"Type mismatch in declaration of {statement.name!r}: "
+                    f"expected {statement.var_type}, got {expr_type}",
+                )
 
         self.symbols[statement.name] = statement.var_type
+        self.symbol_table.append(SymbolEntry(
+            name=statement.name,
+            var_type=statement.var_type,
+            line=statement.token.line,
+            column=statement.token.column,
+        ))
 
     def analyze_assignment(self, statement: Assignment) -> None:
         if statement.name not in self.symbols:
@@ -330,6 +438,19 @@ class SemanticAnalyzer:
                 f"Type mismatch in assignment to {statement.name!r}: "
                 f"expected {var_type}, got {expr_type}",
             )
+
+    def analyze_if_statement(self, stmt: IfStatement) -> None:
+        cond_type = self.infer_expr_type(stmt.condition)
+        if cond_type != TYPE_BOOL:
+            self.error(stmt.token, f"If condition must be {TYPE_BOOL}, got {cond_type}")
+        self.analyze(stmt.body)
+        for elif_branch in stmt.elif_branches:
+            cond_type = self.infer_expr_type(elif_branch.condition)
+            if cond_type != TYPE_BOOL:
+                self.error(elif_branch.token, f"Else-if condition must be {TYPE_BOOL}, got {cond_type}")
+            self.analyze(elif_branch.body)
+        if stmt.else_body is not None:
+            self.analyze(stmt.else_body)
 
     def infer_expr_type(self, expr: Expr) -> str:
         if isinstance(expr, Literal):
@@ -395,6 +516,22 @@ class SemanticAnalyzer:
                     self.error(expr.token, f"Operator '{op}' with zero divisor is not allowed")
                 return TYPE_INT
 
+            if op in {">", "<", ">=", "<="}:
+                if not (self.is_numeric(left_type) and self.is_numeric(right_type)):
+                    self.error(
+                        expr.token,
+                        f"Operator '{op}' requires numeric operands (got {left_type} and {right_type})",
+                    )
+                return TYPE_BOOL
+
+            if op in {"==", "!="}:
+                if not (left_type == right_type or (self.is_numeric(left_type) and self.is_numeric(right_type))):
+                    self.error(
+                        expr.token,
+                        f"Operator '{op}' requires matching types (got {left_type} and {right_type})",
+                    )
+                return TYPE_BOOL
+
             self.error(expr.token, f"Unknown operator {op!r}")
 
         raise SemanticError("Unknown expression node")
@@ -436,19 +573,24 @@ def print_tokens(tokens: List[Token]) -> None:
 
 def main() -> None:
     sample_program = '''
-Bilang x dutokan-> 10;
-Bilang y dutokan-> 20;
-Gudua avg dutokan-> (x + y) / 2;
-Bilang quotient dutokan-> y // 3;
-Bilang rem dutokan-> y % 3;
+Bilang x dutokan-> 10, y dutokan-> 5, z;
+Gudua result dutokan-> ((x + y) * 2) / 3;
+Bilang quotient dutokan-> y // 2;
+Bilang rem dutokan-> y % 2;
 Sarsarita name dutokan-> "Jules";
 Pudno active dutokan-> true;
-Ibaga("Hello, " + name, "\n");
-Ibaga("avg=\t", "");
-Ibaga(avg);
-Ibaga("quotient=\t", "");
-Ibaga(quotient, "\t");
-Ibaga(rem);
+Ibaga("Hello, " + name, "\\n");
+Ibaga("result=\\t", "");
+Ibaga(result);
+nu (x > y) {
+    Ibaga("x is greater than y");
+}
+sabali nu (x == y) {
+    Ibaga("x is equal to y");
+}
+sabali {
+    Ibaga("x is less than or equal to y");
+}
 '''.strip("\n")
 
     lexer = Lexer(sample_program)
@@ -470,4 +612,3 @@ Ibaga(rem);
 
 if __name__ == "__main__":
     main()
-
