@@ -25,23 +25,29 @@ from main import (
 )
 
 
+SEPARATOR = "=" * 60
+
+
 # ---------------------------------------------------------------------------
-# Lexical Analysis display
+# Lexical Analysis
 # ---------------------------------------------------------------------------
 
 def print_lexical_analysis(tokens: List[Token]) -> None:
-    print("=" * 70)
-    print("LEXICAL ANALYSIS (Tokenization)")
-    print("=" * 70)
-    print(f"{'TOKEN TYPE':<14} {'VALUE':<30} {'LINE':<6} {'COL':<6}")
-    print("-" * 70)
-    for tok in tokens:
-        print(f"{tok.type:<14} {tok.value!r:<30} {tok.line:<6} {tok.column:<6}")
-    print(f"\nTotal tokens: {len(tokens)}")
+    print(SEPARATOR)
+    print("  LEXICAL ANALYSIS")
+    print(SEPARATOR)
+    visible = [t for t in tokens if t.type != "EOF"]
+    if not visible:
+        print("  Status: OK (no tokens - empty program)")
+        return
+    print("  Status: OK")
+    print(f"  Tokens generated: {len(visible)}\n")
+    for tok in visible:
+        print(f"    [{tok.line}:{tok.column}]  {tok.type:<14} {tok.value!r}")
 
 
 # ---------------------------------------------------------------------------
-# Syntax Analysis display (AST tree)
+# Syntax Analysis (AST Tree)
 # ---------------------------------------------------------------------------
 
 def expr_str(expr: Expr) -> str:
@@ -56,15 +62,6 @@ def expr_str(expr: Expr) -> str:
             return "Ikabil()"
         return f"Ikabil({expr_str(expr.prompt)})"
     return "?"
-
-
-def print_ast_node(prefix: str, label: str, is_last: bool, children_fn=None) -> str:
-    connector = "└── " if is_last else "├── "
-    child_prefix = prefix + ("    " if is_last else "│   ")
-    result = f"{prefix}{connector}{label}\n"
-    if children_fn:
-        result += children_fn(child_prefix)
-    return result
 
 
 def format_statement(stmt: Statement, prefix: str, is_last: bool) -> str:
@@ -93,11 +90,9 @@ def format_statement(stmt: Statement, prefix: str, is_last: bool) -> str:
 
     if isinstance(stmt, IfStatement):
         result = f"{prefix}{connector}IfStatement\n"
-        # Count total children for is_last tracking
         total = 1 + len(stmt.elif_branches) + (1 if stmt.else_body is not None else 0)
         idx = 0
 
-        # If branch
         idx += 1
         branch_last = idx == total
         branch_conn = "`-- " if branch_last else "|-- "
@@ -106,7 +101,6 @@ def format_statement(stmt: Statement, prefix: str, is_last: bool) -> str:
         for i, s in enumerate(stmt.body):
             result += format_statement(s, branch_child, i == len(stmt.body) - 1)
 
-        # Elif branches
         for elif_branch in stmt.elif_branches:
             idx += 1
             branch_last = idx == total
@@ -116,9 +110,7 @@ def format_statement(stmt: Statement, prefix: str, is_last: bool) -> str:
             for i, s in enumerate(elif_branch.body):
                 result += format_statement(s, branch_child, i == len(elif_branch.body) - 1)
 
-        # Else branch
         if stmt.else_body is not None:
-            idx += 1
             branch_conn = "`-- "
             branch_child = child_prefix + "    "
             result += f"{child_prefix}{branch_conn}Else\n"
@@ -131,35 +123,35 @@ def format_statement(stmt: Statement, prefix: str, is_last: bool) -> str:
 
 
 def print_syntax_analysis(statements: List[Statement]) -> None:
-    print("\n" + "=" * 70)
-    print("SYNTAX ANALYSIS (Abstract Syntax Tree)")
-    print("=" * 70)
-    print("Program")
+    print("\n" + SEPARATOR)
+    print("  SYNTAX ANALYSIS")
+    print(SEPARATOR)
+    if not statements:
+        print("  Status: OK (empty program)")
+        return
+    print("  Status: OK\n")
+    print("  Program")
     for i, stmt in enumerate(statements):
-        print(format_statement(stmt, "", i == len(statements) - 1), end="")
+        lines = format_statement(stmt, "", i == len(statements) - 1).rstrip("\n").split("\n")
+        for line in lines:
+            print(f"  {line}")
 
 
 # ---------------------------------------------------------------------------
-# Semantic Analysis display (Symbol Table + Validation)
+# Semantic Analysis (Symbol Table)
 # ---------------------------------------------------------------------------
-
-def print_symbol_table(symbol_table: List[SymbolEntry]) -> None:
-    print("\n" + "=" * 70)
-    print("SYMBOL TABLE")
-    print("=" * 70)
-    print(f"{'#':<4} {'NAME':<16} {'TYPE':<14} {'LINE':<6} {'COL':<6}")
-    print("-" * 70)
-    for i, entry in enumerate(symbol_table, 1):
-        print(f"{i:<4} {entry.name:<16} {entry.var_type:<14} {entry.line:<6} {entry.column:<6}")
-    print(f"\nTotal symbols: {len(symbol_table)}")
-
 
 def print_semantic_analysis(semantic: SemanticAnalyzer) -> None:
-    print("\n" + "=" * 70)
-    print("SEMANTIC ANALYSIS (Type Checking)")
-    print("=" * 70)
-    print("All type checks passed.")
-    print_symbol_table(semantic.symbol_table)
+    print("\n" + SEPARATOR)
+    print("  SEMANTIC ANALYSIS")
+    print(SEPARATOR)
+    print("  Status: OK\n")
+    if not semantic.symbol_table:
+        print("  Symbol Table: (empty)")
+        return
+    print("  Symbol Table:")
+    for entry in semantic.symbol_table:
+        print(f"    {entry.name} : {entry.var_type}  (line {entry.line}, col {entry.column})")
 
 
 # ---------------------------------------------------------------------------
@@ -167,11 +159,11 @@ def print_semantic_analysis(semantic: SemanticAnalyzer) -> None:
 # ---------------------------------------------------------------------------
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
+    ap = argparse.ArgumentParser(
         description="Show Lexical, Syntax, and Semantic analysis of an .elokano source file."
     )
-    parser.add_argument("source", nargs="?", default="test.elokano")
-    args = parser.parse_args()
+    ap.add_argument("source", nargs="?", default="test.elokano")
+    args = ap.parse_args()
 
     source_path = Path(args.source)
     if not source_path.exists():
@@ -179,25 +171,28 @@ def main() -> None:
 
     source = source_path.read_text(encoding="utf-8-sig")
 
-    # Phase 1: Lexical Analysis
-    print(f"Source file: {source_path}\n")
+    print(f"\n  Source: {source_path}\n")
+
+    # Phase 1 — Lexical Analysis
     lexer = Lexer(source)
     tokens = lexer.tokenize()
     print_lexical_analysis(tokens)
 
-    # Phase 2: Syntax Analysis
+    # Phase 2 — Syntax Analysis
     p = Parser(tokens)
     statements = p.parse()
     print_syntax_analysis(statements)
 
-    # Phase 3: Semantic Analysis
+    # Phase 3 — Semantic Analysis
     semantic = SemanticAnalyzer()
     semantic.analyze(statements)
     print_semantic_analysis(semantic)
+
+    print()
 
 
 if __name__ == "__main__":
     try:
         main()
     except (LexerError, ParserError, SemanticError, FileNotFoundError) as err:
-        print(f"\nERROR: {err}")
+        print(f"\n  ERROR: {err}")
