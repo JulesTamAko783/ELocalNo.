@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import EditorPanel from './components/Editor';
 import LexerPanel from './components/LexerPanel';
@@ -11,17 +11,6 @@ import { parse } from './lib/parser';
 import { analyze } from './lib/semantic';
 import { interpret } from './lib/interpreter';
 import { DEFAULT_CODE } from './examples';
-
-/**
- * Main application layout:
- * ┌──────────────────────────┬────────────────────────────────┐
- * │                          │  [ Lexer | Parser | Semantic ] │
- * │   Monaco Code Editor     │  [Active Analysis Panel Here]  │
- * │                          │                                │
- * ├──────────────────────────┴────────────────────────────────┤
- * │  Output Panel                              [ Run ▶ ]      │
- * └───────────────────────────────────────────────────────────┘
- */
 
 export default function App() {
   const [currentView, setCurrentView] = useState('editor');
@@ -38,11 +27,10 @@ export default function App() {
   const [semanticErrors, setSemanticErrors] = useState(null);
   const [output, setOutput] = useState('');
   const [runtimeError, setRuntimeError] = useState(null);
-  const [analysisStatus, setAnalysisStatus] = useState(null); // 'pass' | 'fail' | null
+  const [analysisStatus, setAnalysisStatus] = useState(null);
 
-  // Debounced live analysis (lexer only, for responsiveness)
+  // Debounced live lexer
   const debounceRef = useRef(null);
-
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
@@ -53,51 +41,35 @@ export default function App() {
     return () => clearTimeout(debounceRef.current);
   }, [code]);
 
-  // Run all analysis phases + interpreter
+  // Run all phases
   const handleRun = useCallback(() => {
-    // Phase 1: Lexer
     const lexResult = tokenize(code);
     setTokens(lexResult.tokens);
     setLexerError(lexResult.error);
-
     if (lexResult.error) {
-      setAst(null);
-      setParseError(null);
-      setSymbolTable(null);
-      setSemanticErrors(null);
-      setOutput('');
-      setRuntimeError(null);
+      setAst(null); setParseError(null); setSymbolTable(null);
+      setSemanticErrors(null); setOutput(''); setRuntimeError(null);
       setAnalysisStatus('fail');
       return;
     }
 
-    // Phase 2: Parser
     const parseResult = parse(lexResult.tokens);
     setAst(parseResult.ast);
     setParseError(parseResult.error);
-
     if (parseResult.error) {
-      setSymbolTable(null);
-      setSemanticErrors(null);
-      setOutput('');
-      setRuntimeError(null);
-      setAnalysisStatus('fail');
+      setSymbolTable(null); setSemanticErrors(null);
+      setOutput(''); setRuntimeError(null); setAnalysisStatus('fail');
       return;
     }
 
-    // Phase 3: Semantic Analyzer
     const semResult = analyze(parseResult.ast);
     setSymbolTable(semResult.symbolTable);
     setSemanticErrors(semResult.errors);
-
     if (semResult.errors.length > 0) {
-      setOutput('');
-      setRuntimeError(null);
-      setAnalysisStatus('fail');
+      setOutput(''); setRuntimeError(null); setAnalysisStatus('fail');
       return;
     }
 
-    // Phase 4: Interpreter
     setAnalysisStatus('pass');
     const lines = inputLines.split('\n').filter((l) => l.length > 0 || inputLines.includes('\n'));
     const interpResult = interpret(parseResult.ast, lines);
@@ -105,46 +77,44 @@ export default function App() {
     setRuntimeError(interpResult.error);
   }, [code, inputLines]);
 
-  // Tab definitions
   const tabs = [
     { id: 'lexer', label: 'Lexer', icon: '\uD83E\uDEA8' },
     { id: 'parser', label: 'Parser', icon: '\uD83C\uDF3E' },
     { id: 'semantic', label: 'Semantic', icon: '\u26F0' },
   ];
 
-  // Render the About page
+  // About page
   if (currentView === 'about') {
     return (
-      <div className="h-screen flex flex-col">
+      <div className="app-shell">
         <Navbar currentView={currentView} onViewChange={setCurrentView} />
         <ReadmeViewer />
       </div>
     );
   }
 
-  // Render the IDE
+  // IDE view
   return (
-    <div className="h-screen flex flex-col">
+    <div className="app-shell">
       <Navbar currentView={currentView} onViewChange={setCurrentView} />
 
-      {/* Main IDE area */}
-      <div className="flex-1 flex flex-col min-h-0">
-        {/* Editor + Analysis panels */}
-        <div className="ide-layout flex-1 flex min-h-0">
-          {/* Left: Code Editor */}
-          <div className="editor-pane w-1/2 min-h-0 border-r border-[var(--color-stone)]">
+      <div className="ide-scroll-area">
+        {/* Editor + Analysis: side-by-side on desktop, stacked on mobile/tablet */}
+        <div className="ide-layout">
+          {/* Code Editor */}
+          <div className="editor-pane">
             <EditorPanel code={code} onCodeChange={setCode} onRun={handleRun} />
           </div>
 
-          {/* Right: Analysis panels */}
-          <div className="analysis-pane w-1/2 flex flex-col min-h-0">
+          {/* Analysis panels */}
+          <div className="analysis-pane">
             {/* Tab bar */}
             <div className="panel-header flex items-center gap-0 px-2 py-0">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`tab-btn px-3 py-2 text-xs font-bold ${activeTab === tab.id ? 'active' : ''}`}
+                  className={`tab-btn px-3 py-2.5 text-xs font-bold ${activeTab === tab.id ? 'active' : ''}`}
                   aria-label={`${tab.label} panel`}
                   aria-selected={activeTab === tab.id}
                   role="tab"
@@ -156,25 +126,19 @@ export default function App() {
             </div>
 
             {/* Active panel */}
-            <div className="flex-1 min-h-0 overflow-auto panel">
-              {activeTab === 'lexer' && (
-                <LexerPanel tokens={tokens} error={lexerError} />
-              )}
-              {activeTab === 'parser' && (
-                <ParserPanel ast={ast} error={parseError} />
-              )}
-              {activeTab === 'semantic' && (
-                <SemanticPanel symbolTable={symbolTable} errors={semanticErrors} />
-              )}
+            <div className="analysis-content panel">
+              {activeTab === 'lexer' && <LexerPanel tokens={tokens} error={lexerError} />}
+              {activeTab === 'parser' && <ParserPanel ast={ast} error={parseError} />}
+              {activeTab === 'semantic' && <SemanticPanel symbolTable={symbolTable} errors={semanticErrors} />}
             </div>
           </div>
         </div>
 
-        {/* Ilocano wave divider */}
+        {/* Wave divider */}
         <div className="divider-wave" aria-hidden="true"></div>
 
-        {/* Bottom: Output panel */}
-        <div className="h-[200px] min-h-[120px] panel border-t border-[var(--color-stone)]">
+        {/* Output panel */}
+        <div className="output-pane panel">
           <OutputPanel
             output={output}
             runtimeError={runtimeError}

@@ -11,9 +11,9 @@ import readmeContent from '../content/readme.md?raw';
 
 export default function ReadmeViewer() {
   return (
-    <div className="h-full overflow-auto inabel-bg">
-      <div className="max-w-3xl mx-auto px-6 py-8">
-        <div className="panel p-6 rounded-sm readme-content">
+    <div className="flex-1 overflow-auto inabel-bg">
+      <div className="max-w-3xl mx-auto px-3 py-4 sm:px-6 sm:py-8">
+        <div className="panel p-3 sm:p-6 rounded-sm readme-content">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>
             {readmeContent}
           </ReactMarkdown>

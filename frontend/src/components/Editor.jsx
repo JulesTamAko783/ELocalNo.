@@ -103,10 +103,13 @@ export default function EditorPanel({ code, onCodeChange, onRun }) {
     }
   }, [onCodeChange]);
 
+  // Responsive font size
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
   return (
     <div className="flex flex-col h-full">
       {/* Toolbar */}
-      <div className="panel-header flex items-center justify-between px-3 py-1.5 gap-2">
+      <div className="panel-header flex items-center justify-between px-3 py-1.5 gap-2 flex-wrap">
         <div className="flex items-center gap-2">
           <span className="font-heading text-sm font-bold text-[var(--color-soil)]">
             Source Code
@@ -114,8 +117,9 @@ export default function EditorPanel({ code, onCodeChange, onRun }) {
           <select
             onChange={handleExampleChange}
             defaultValue=""
-            className="text-xs px-2 py-0.5 bg-[var(--color-parchment)] border border-[var(--color-stone)] rounded-sm font-body text-[var(--color-soil)] cursor-pointer"
+            className="text-xs px-2 py-1 bg-[var(--color-parchment)] border border-[var(--color-stone)] rounded-sm font-body text-[var(--color-soil)] cursor-pointer"
             aria-label="Load example program"
+            style={{ minHeight: 32 }}
           >
             <option value="" disabled>Examples...</option>
             {EXAMPLES.map((ex, i) => (
@@ -125,7 +129,7 @@ export default function EditorPanel({ code, onCodeChange, onRun }) {
         </div>
         <button
           onClick={onRun}
-          className="btn-run px-4 py-1 text-sm flex items-center gap-1.5"
+          className="btn-run px-4 py-1.5 text-sm flex items-center gap-1.5"
           aria-label="Run program"
         >
           <span aria-hidden="true">&#9654;</span> Run
@@ -142,17 +146,21 @@ export default function EditorPanel({ code, onCodeChange, onRun }) {
           onChange={(value) => onCodeChange(value || '')}
           onMount={handleEditorMount}
           options={{
-            fontSize: 14,
+            fontSize: isMobile ? 12 : 14,
             fontFamily: '"Fira Code", monospace',
             fontLigatures: true,
             minimap: { enabled: false },
-            lineNumbers: 'on',
+            lineNumbers: isMobile ? 'off' : 'on',
             renderLineHighlight: 'line',
             bracketPairColorization: { enabled: true },
             scrollBeyondLastLine: false,
             wordWrap: 'on',
             tabSize: 4,
             padding: { top: 8 },
+            scrollbar: {
+              verticalScrollbarSize: isMobile ? 4 : 10,
+              horizontalScrollbarSize: isMobile ? 4 : 10,
+            },
           }}
         />
       </div>

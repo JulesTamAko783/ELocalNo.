@@ -1,9 +1,5 @@
 import React, { useState } from 'react';
 
-/**
- * Navigation bar — dark burnished wood with inabel stripe accent.
- * Shows logo, navigation links, and a mobile hamburger menu.
- */
 export default function Navbar({ currentView, onViewChange }) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -18,15 +14,15 @@ export default function Navbar({ currentView, onViewChange }) {
         {/* Logo */}
         <button
           className="flex items-center gap-2 text-[var(--color-parchment)] hover:text-[var(--color-palay)] transition-colors"
-          onClick={() => onViewChange('editor')}
+          onClick={() => { onViewChange('editor'); setMobileOpen(false); }}
           aria-label="Go to editor"
         >
           <span className="text-xl" role="img" aria-hidden="true">🌾</span>
           <span className="logo text-lg font-bold tracking-wide">Elokano IDE</span>
         </button>
 
-        {/* Desktop links */}
-        <div className="navbar-links hidden md:flex items-center gap-1">
+        {/* Desktop links (hidden on mobile via CSS) */}
+        <div className="navbar-links flex items-center gap-1">
           {links.map((link) => (
             <button
               key={link.id}
@@ -44,29 +40,31 @@ export default function Navbar({ currentView, onViewChange }) {
           ))}
         </div>
 
-        {/* Mobile hamburger */}
+        {/* Mobile hamburger (hidden on desktop via CSS) */}
         <button
-          className="mobile-menu-btn hidden text-[var(--color-parchment)] text-xl p-1"
+          className="mobile-menu-btn hidden text-[var(--color-parchment)] text-2xl p-2 -mr-2"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Toggle navigation menu"
+          style={{ minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
           {mobileOpen ? '\u2715' : '\u2630'}
         </button>
       </div>
 
-      {/* Mobile dropdown */}
+      {/* Mobile dropdown menu */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-[var(--color-soil)] px-4 pb-2">
+        <div className="border-t border-[var(--color-soil)] px-4 pb-2">
           {links.map((link) => (
             <button
               key={link.id}
               onClick={() => { onViewChange(link.id); setMobileOpen(false); }}
-              className={`block w-full text-left px-3 py-2 text-sm ${
+              className={`block w-full text-left px-3 py-3 text-base ${
                 currentView === link.id
                   ? 'text-[var(--color-palay)]'
                   : 'text-[var(--color-limestone)]'
               }`}
               aria-label={link.label}
+              style={{ minHeight: 44 }}
             >
               <span className="mr-2" aria-hidden="true">{link.icon}</span>
               {link.label}

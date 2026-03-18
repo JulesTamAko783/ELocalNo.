@@ -15,36 +15,35 @@ export default function OutputPanel({ output, runtimeError, analysisStatus, onRu
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="panel-header flex items-center justify-between px-3 py-1.5">
-        <div className="flex items-center gap-3">
+      <div className="panel-header flex items-center justify-between px-3 py-1.5 flex-wrap gap-1">
+        <div className="flex items-center gap-2">
           <span className="font-heading text-sm font-bold text-[var(--color-soil)]">Output</span>
 
-          {/* Analysis status badge */}
           {analysisStatus === 'pass' && (
-            <span className="text-xs status-pass font-semibold">&#10003; Analysis passed</span>
+            <span className="text-xs status-pass font-semibold">&#10003; Passed</span>
           )}
           {analysisStatus === 'fail' && (
-            <span className="text-xs status-fail font-semibold">&#10007; Errors found</span>
+            <span className="text-xs status-fail font-semibold">&#10007; Errors</span>
           )}
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Toggle input panel */}
           <button
             onClick={() => setShowInput(!showInput)}
-            className={`text-xs px-2 py-0.5 rounded-sm border transition-colors ${
+            className={`text-xs px-3 py-1.5 rounded-sm border transition-colors ${
               showInput
                 ? 'bg-[var(--color-clay)] text-[var(--color-parchment)] border-[var(--color-clay)]'
                 : 'bg-transparent text-[var(--color-stone)] border-[var(--color-stone)] hover:border-[var(--color-clay)]'
             }`}
             aria-label={showInput ? 'Hide input panel' : 'Show input panel'}
+            style={{ minHeight: 36 }}
           >
             Input
           </button>
 
           <button
             onClick={onRun}
-            className="btn-run px-4 py-1 text-sm flex items-center gap-1.5"
+            className="btn-run px-4 py-1.5 text-sm flex items-center gap-1.5"
             aria-label="Run program"
           >
             <span aria-hidden="true">&#9654;</span> Run
