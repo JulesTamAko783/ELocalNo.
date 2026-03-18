@@ -360,12 +360,17 @@ code, pre, .editor, .mono { font-family: 'Fira Code', monospace; }
    ══════════════════════════════════════════════════════════════════════════ */
 
 @media (max-width: 768px) {
-  /* Navbar: hide desktop links, show hamburger */
+  /* Navbar: hide desktop links, show hamburger + mobile music toggle */
   .navbar-links {
     display: none !important;
   }
   .mobile-menu-btn {
-    display: block !important;
+    display: flex !important;
+  }
+  .mobile-music-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
   }
 
   /* Editor takes more of the screen */
