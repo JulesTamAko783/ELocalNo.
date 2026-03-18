@@ -60,7 +60,7 @@ export function analyze(ast) {
   const scopeStack = [{}];     // stack of scope maps; scopeStack[0] is global
   const symbolTable = [];      // ordered list of declarations
   const errors = [];           // collected error messages
-  let currentOffset = 0;       // running memory offset for symbol table
+  const offsetStack = [0];     // independent offset counter per scope level
 
   function currentScope() {
     return scopeStack[scopeStack.length - 1];
@@ -68,10 +68,12 @@ export function analyze(ast) {
 
   function pushScope() {
     scopeStack.push({});
+    offsetStack.push(0);  // Reset Rule: new scope starts at offset 0
   }
 
   function popScope() {
     scopeStack.pop();
+    offsetStack.pop();    // discard inner offset; parent resumes automatically
   }
 
   function lookupSymbol(name) {
@@ -127,8 +129,8 @@ export function analyze(ast) {
     const level = scopeStack.length - 1;
     const scope = level === 0 ? 'Level 0 (Global)' : `Level ${level} (Local)`;
     const weight = TYPE_WEIGHTS[stmt.varType] || 0;
-    const offset = currentOffset;
-    currentOffset += weight;
+    const offset = offsetStack[offsetStack.length - 1];
+    offsetStack[offsetStack.length - 1] += weight;
     symbolTable.push({
       name: stmt.name,
       varType: stmt.varType,
