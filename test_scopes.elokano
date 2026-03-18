@@ -1,0 +1,11 @@
+Bilang a dutokan-> 10;
+Gudua b dutokan-> 3.14;
+
+nu (a > 5) {
+    Bilang inner1 dutokan-> 1;
+    Sarsarita inner2 dutokan-> "hello";
+}
+sabali {
+    Gudua sibling1 dutokan-> 2.0;
+    Bilang sibling2 dutokan-> 42;
+}

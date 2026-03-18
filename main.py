@@ -395,7 +395,7 @@ class SemanticAnalyzer:
     def __init__(self):
         self.scope_stack: List[Dict[str, str]] = [{}]  # stack of scope maps
         self.symbol_table: List[SymbolEntry] = []
-        self.current_offset: int = 0
+        self.offset_stack: List[int] = [0]  # independent offset counter per scope level
 
     @property
     def symbols(self) -> Dict[str, str]:
@@ -407,9 +407,11 @@ class SemanticAnalyzer:
 
     def push_scope(self) -> None:
         self.scope_stack.append({})
+        self.offset_stack.append(0)  # Reset Rule: new scope starts at offset 0
 
     def pop_scope(self) -> None:
         self.scope_stack.pop()
+        self.offset_stack.pop()  # discard inner offset; parent resumes automatically
 
     def lookup_symbol(self, name: str):
         for scope in reversed(self.scope_stack):
@@ -454,8 +456,8 @@ class SemanticAnalyzer:
         level = len(self.scope_stack) - 1
         scope = "Level 0 (Global)" if level == 0 else f"Level {level} (Local)"
         weight = TYPE_WEIGHTS.get(statement.var_type, 0)
-        offset = self.current_offset
-        self.current_offset += weight
+        offset = self.offset_stack[-1]
+        self.offset_stack[-1] += weight
         self.symbol_table.append(SymbolEntry(
             name=statement.name,
             var_type=statement.var_type,
