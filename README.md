@@ -7,6 +7,8 @@ Small compiler pipeline for a custom `.elokano` language:
 - target code generation to C++
 - one-command run flow (`coderun`)
 
+Website: https://e-local-no.vercel.app/
+
 ## 1. Language Reference
 
 ### 1.1 Keywords
