@@ -1,0 +1,328 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ELOKANO IDE — Rural Northern Philippines Design System
+   Inspired by Ilocos stone walls, bahay kubo, rice terraces, inabel textiles
+   ══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Stone & Earth */
+  --color-stone:       #8B7355;
+  --color-clay:        #C4734A;
+  --color-soil:        #5C4033;
+  --color-limestone:   #E8DCC8;
+
+  /* Rice & Harvest */
+  --color-palay:       #D4B483;
+  --color-harvest:     #A67C52;
+  --color-basi:        #6B2D3E;
+
+  /* Nature */
+  --color-pine:        #2D4A2D;
+  --color-terraces:    #4A7C59;
+  --color-sky:         #7BA7BC;
+  --color-fog:         #C8D8E0;
+
+  /* Text */
+  --color-ink:         #2C1810;
+  --color-parchment:   #F5EDD6;
+
+  /* Semantic overrides */
+  --bg-primary:        var(--color-parchment);
+  --bg-editor:         #1A0F0A;
+  --accent-primary:    var(--color-clay);
+  --accent-secondary:  var(--color-basi);
+  --text-primary:      var(--color-ink);
+  --border-color:      var(--color-stone);
+}
+
+/* ── Base reset ──────────────────────────────────────────────────────────── */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Lora', serif;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+}
+
+h1, h2, h3, h4, h5, h6, .logo {
+  font-family: 'Libre Baskerville', serif;
+}
+
+code, pre, .editor, .mono {
+  font-family: 'Fira Code', monospace;
+}
+
+/* ── Inabel texture overlay ──────────────────────────────────────────────── */
+/* Subtle woven diamond pattern as an SVG background */
+
+.inabel-bg {
+  background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 0L24 12L12 24L0 12Z' fill='none' stroke='%238B7355' stroke-width='0.3' opacity='0.12'/%3E%3C/svg%3E");
+  background-size: 24px 24px;
+}
+
+/* ── Navbar ──────────────────────────────────────────────────────────────── */
+
+.navbar {
+  background-color: var(--color-ink);
+  border-bottom: 3px solid var(--color-clay);
+  background-image: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(196, 115, 74, 0.08) 20%,
+    rgba(196, 115, 74, 0.12) 50%,
+    rgba(196, 115, 74, 0.08) 80%,
+    transparent 100%
+  );
+}
+
+.navbar .stripe {
+  height: 2px;
+  background: repeating-linear-gradient(
+    to right,
+    var(--color-clay) 0px,
+    var(--color-clay) 8px,
+    transparent 8px,
+    transparent 12px,
+    var(--color-palay) 12px,
+    var(--color-palay) 20px,
+    transparent 20px,
+    transparent 24px
+  );
+}
+
+/* ── Panel styling ───────────────────────────────────────────────────────── */
+
+.panel {
+  background-color: var(--bg-primary);
+  border: 1.5px solid var(--border-color);
+  box-shadow: inset 0 1px 4px rgba(44, 24, 16, 0.1);
+}
+
+.panel-header {
+  background-color: var(--color-limestone);
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+
+.btn-run {
+  background-color: var(--color-clay);
+  color: var(--color-parchment);
+  border: 1px solid var(--color-soil);
+  border-radius: 2px;
+  font-family: 'Libre Baskerville', serif;
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgba(44, 24, 16, 0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.btn-run:hover {
+  background-color: var(--color-basi);
+  box-shadow: 0 2px 4px rgba(44, 24, 16, 0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+.btn-run:active {
+  box-shadow: inset 0 1px 3px rgba(44, 24, 16, 0.4);
+}
+
+/* ── Tab buttons ─────────────────────────────────────────────────────────── */
+
+.tab-btn {
+  font-family: 'Libre Baskerville', serif;
+  color: var(--color-stone);
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+  background: none;
+  cursor: pointer;
+}
+
+.tab-btn:hover {
+  color: var(--color-clay);
+}
+
+.tab-btn.active {
+  color: var(--color-clay);
+  border-bottom-color: var(--color-clay);
+}
+
+/* ── Token color coding (Lexer panel) ────────────────────────────────────── */
+
+.tok-keyword   { color: var(--color-clay); }
+.tok-ident     { color: var(--color-terraces); }
+.tok-literal   { color: #B8860B; }
+.tok-operator  { color: var(--color-stone); }
+.tok-delimiter { color: var(--color-harvest); }
+.tok-error     { color: #C0392B; font-weight: 700; }
+
+/* ── Ilocano wave divider ────────────────────────────────────────────────── */
+
+.divider-wave {
+  height: 6px;
+  background: repeating-linear-gradient(
+    to right,
+    var(--color-clay) 0px,
+    var(--color-clay) 4px,
+    transparent 4px,
+    transparent 6px,
+    var(--color-palay) 6px,
+    var(--color-palay) 10px,
+    transparent 10px,
+    transparent 12px,
+    var(--color-stone) 12px,
+    var(--color-stone) 16px,
+    transparent 16px,
+    transparent 20px
+  );
+  opacity: 0.5;
+}
+
+/* ── Loading animation (rice grain weaving) ──────────────────────────────── */
+
+@keyframes weave {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.loading-weave {
+  overflow: hidden;
+  position: relative;
+  height: 4px;
+  background-color: var(--color-limestone);
+}
+
+.loading-weave::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right, var(--color-clay), var(--color-palay), var(--color-clay));
+  animation: weave 1.5s ease-in-out infinite;
+}
+
+/* ── Scrollbar styling ───────────────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-limestone);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-stone);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-harvest);
+}
+
+/* ── Status indicators ───────────────────────────────────────────────────── */
+
+.status-pass {
+  color: var(--color-terraces);
+}
+
+.status-fail {
+  color: #C0392B;
+}
+
+/* ── AST tree ────────────────────────────────────────────────────────────── */
+
+.ast-node {
+  padding-left: 1.25rem;
+  border-left: 1px dashed var(--color-stone);
+  margin-left: 0.5rem;
+}
+
+.ast-label {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.8rem;
+}
+
+.ast-expression { color: var(--color-sky); }
+.ast-statement  { color: var(--color-clay); }
+.ast-declaration { color: var(--color-terraces); }
+
+/* ── README styling ──────────────────────────────────────────────────────── */
+
+.readme-content h1 { font-size: 1.75rem; margin: 1.5rem 0 0.75rem; color: var(--color-basi); }
+.readme-content h2 { font-size: 1.35rem; margin: 1.25rem 0 0.5rem; color: var(--color-soil); border-bottom: 1px solid var(--color-stone); padding-bottom: 0.25rem; }
+.readme-content h3 { font-size: 1.1rem; margin: 1rem 0 0.4rem; color: var(--color-harvest); }
+.readme-content p  { margin: 0.5rem 0; line-height: 1.7; }
+.readme-content ul, .readme-content ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+.readme-content li { margin: 0.25rem 0; line-height: 1.6; }
+.readme-content code {
+  font-family: 'Fira Code', monospace;
+  background-color: rgba(139, 115, 85, 0.15);
+  padding: 0.1rem 0.35rem;
+  border-radius: 2px;
+  font-size: 0.85em;
+  color: var(--color-soil);
+}
+.readme-content pre {
+  background-color: var(--color-ink);
+  color: var(--color-limestone);
+  padding: 1rem;
+  border-radius: 2px;
+  overflow-x: auto;
+  margin: 0.75rem 0;
+  border: 1px solid var(--color-stone);
+}
+.readme-content pre code {
+  background: none;
+  color: inherit;
+  padding: 0;
+}
+.readme-content table {
+  border-collapse: collapse;
+  margin: 0.75rem 0;
+  width: 100%;
+}
+.readme-content th, .readme-content td {
+  border: 1px solid var(--color-stone);
+  padding: 0.4rem 0.75rem;
+  text-align: left;
+}
+.readme-content th {
+  background-color: var(--color-limestone);
+  font-family: 'Libre Baskerville', serif;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+
+@media (max-width: 1024px) {
+  .ide-layout {
+    flex-direction: column !important;
+  }
+  .editor-pane, .analysis-pane {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar-links {
+    display: none !important;
+  }
+  .mobile-menu-btn {
+    display: block !important;
+  }
+}
