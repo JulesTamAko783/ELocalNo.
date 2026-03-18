@@ -62,6 +62,8 @@ export default function SemanticPanel({ symbolTable, errors }) {
                 <th className="py-1 pr-2">Name</th>
                 <th className="py-1 pr-2">Type</th>
                 <th className="py-1 pr-2">Scope</th>
+                <th className="py-1 pr-2">Offset</th>
+                <th className="py-1 pr-2">Weight(Size)</th>
                 <th className="py-1 pr-2">Line</th>
                 <th className="py-1">Col</th>
               </tr>
@@ -71,7 +73,9 @@ export default function SemanticPanel({ symbolTable, errors }) {
                 <tr key={i} className="border-b border-[rgba(139,115,85,0.15)] hover:bg-[rgba(139,115,85,0.06)]">
                   <td className="py-0.5 pr-2 text-[var(--color-terraces)] font-semibold">{entry.name}</td>
                   <td className="py-0.5 pr-2 tok-keyword">{entry.varType}</td>
-                  <td className="py-0.5 pr-2 text-[var(--color-stone)]">{entry.scope || 'global'}</td>
+                  <td className="py-0.5 pr-2 text-[var(--color-stone)]">{entry.scope || 'Level 0 (Global)'}</td>
+                  <td className="py-0.5 pr-2 text-[var(--color-stone)]">{entry.offset ?? 0}</td>
+                  <td className="py-0.5 pr-2 text-[var(--color-stone)]">{entry.weight ?? 0}</td>
                   <td className="py-0.5 pr-2 text-[var(--color-stone)]">{entry.line}</td>
                   <td className="py-0.5 text-[var(--color-stone)]">{entry.column}</td>
                 </tr>

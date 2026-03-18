@@ -151,7 +151,11 @@ def print_semantic_analysis(semantic: SemanticAnalyzer) -> None:
         return
     print("  Symbol Table:")
     for entry in semantic.symbol_table:
-        print(f"    {entry.name} : {entry.var_type}  [{entry.scope}]  (line {entry.line}, col {entry.column})")
+        print(
+            f"    {entry.name} : {entry.var_type}  [{entry.scope}]  "
+            f"offset={entry.offset}  weight={entry.weight}  "
+            f"(line {entry.line}, col {entry.column})"
+        )
 
 
 # ---------------------------------------------------------------------------

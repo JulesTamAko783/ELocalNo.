@@ -14,6 +14,15 @@ export const TYPE_FLOAT = 'Gudua';
 export const TYPE_STRING = 'Sarsarita';
 export const TYPE_BOOL = 'Pudno';
 
+// ── Type weights (sizes in bytes, matching C++ target) ──────────────────────
+
+export const TYPE_WEIGHTS = {
+  [TYPE_INT]: 4,
+  [TYPE_FLOAT]: 8,
+  [TYPE_STRING]: 32,
+  [TYPE_BOOL]: 1,
+};
+
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
 function isNumeric(type) {
@@ -51,6 +60,7 @@ export function analyze(ast) {
   const scopeStack = [{}];     // stack of scope maps; scopeStack[0] is global
   const symbolTable = [];      // ordered list of declarations
   const errors = [];           // collected error messages
+  let currentOffset = 0;       // running memory offset for symbol table
 
   function currentScope() {
     return scopeStack[scopeStack.length - 1];
@@ -116,10 +126,15 @@ export function analyze(ast) {
     currentScope()[stmt.name] = stmt.varType;
     const level = scopeStack.length - 1;
     const scope = level === 0 ? 'Level 0 (Global)' : `Level ${level} (Local)`;
+    const weight = TYPE_WEIGHTS[stmt.varType] || 0;
+    const offset = currentOffset;
+    currentOffset += weight;
     symbolTable.push({
       name: stmt.name,
       varType: stmt.varType,
       scope,
+      offset,
+      weight,
       line: stmt.token.line,
       column: stmt.token.column,
     });

@@ -140,6 +140,7 @@ export default function App() {
         {/* Output panel */}
         <div className="output-pane panel">
           <OutputPanel
+            code={code}
             output={output}
             runtimeError={runtimeError}
             analysisStatus={analysisStatus}

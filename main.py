@@ -105,8 +105,18 @@ class SymbolEntry:
     name: str
     var_type: str
     scope: str
+    offset: int
+    weight: int
     line: int
     column: int
+
+
+TYPE_WEIGHTS = {
+    TYPE_INT: 4,
+    TYPE_FLOAT: 8,
+    TYPE_STRING: 32,
+    TYPE_BOOL: 1,
+}
 
 
 class Lexer:
@@ -385,6 +395,7 @@ class SemanticAnalyzer:
     def __init__(self):
         self.scope_stack: List[Dict[str, str]] = [{}]  # stack of scope maps
         self.symbol_table: List[SymbolEntry] = []
+        self.current_offset: int = 0
 
     @property
     def symbols(self) -> Dict[str, str]:
@@ -442,10 +453,15 @@ class SemanticAnalyzer:
         self.current_scope()[statement.name] = statement.var_type
         level = len(self.scope_stack) - 1
         scope = "Level 0 (Global)" if level == 0 else f"Level {level} (Local)"
+        weight = TYPE_WEIGHTS.get(statement.var_type, 0)
+        offset = self.current_offset
+        self.current_offset += weight
         self.symbol_table.append(SymbolEntry(
             name=statement.name,
             var_type=statement.var_type,
             scope=scope,
+            offset=offset,
+            weight=weight,
             line=statement.token.line,
             column=statement.token.column,
         ))
