@@ -1,192 +1,13 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import readmeContent from '../content/readme.md?raw';
 
 /**
- * README viewer — renders the Elokano language documentation
- * in a parchment-styled reading view.
+ * README viewer — renders the full Elokano language documentation
+ * loaded directly from the project's README.md file.
+ * Styled as an aged parchment manuscript.
  */
-
-const README_CONTENT = `# Elokano Language Prototype
-
-Small compiler pipeline for a custom \`.elokano\` language:
-- lexical analysis (tokenization)
-- syntax analysis (parsing)
-- semantic analysis (type and symbol checks)
-- target code generation to C++
-- one-command run flow (\`coderun\`)
-
-## 1. Language Reference
-
-### 1.1 Keywords
-
-- \`Bilang\` -> integer type
-- \`Gudua\` -> float type
-- \`Sarsarita\` -> string type
-- \`Pudno\` -> boolean type
-- \`Ibaga\` -> output
-- \`Ikabil\` -> input
-- \`nu\` -> if
-- \`sabali\` -> else (used alone for else, combined as \`sabali nu\` for else-if)
-- \`true\`, \`false\` -> boolean literals
-
-### 1.2 Operators and Delimiters
-
-- \`dutokan->\` -> assignment
-- \`;\` -> statement delimiter
-- \`(\` \`)\` -> grouping / enclosing delimiters
-- \`{\` \`}\` -> block delimiters
-- \`+\` -> addition
-- \`-\` -> subtraction
-- \`*\` -> multiplication
-- \`/\` -> floating-point division
-- \`//\` -> floor/integer division
-- \`%\` -> modulo/remainder
-- \`>\` -> greater than
-- \`<\` -> less than
-- \`>=\` -> greater than or equal
-- \`<=\` -> less than or equal
-- \`==\` -> equal
-- \`!=\` -> not equal
-
-## 2. Grammar (Current)
-
-Statements inside blocks (\`{ ... }\`) follow the same rules.
-If/else-if/else statements do **not** end with \`;\`.
-All other statements must end with \`;\`.
-
-\`\`\`text
-<program>       ::= <statement_list> EOF
-
-<statement_list>::= (<declaration_stmt> | <if_statement> | <simple_stmt>)*
-
-<declaration_stmt> ::= <type> <var_init> ("," <var_init>)* ";"
-<type>          ::= Bilang | Gudua | Sarsarita | Pudno
-<var_init>      ::= IDENT [ dutokan-> <expr> ]
-
-<simple_stmt>   ::= (<assignment> | <output>) ";"
-<assignment>    ::= IDENT dutokan-> <expr>
-<output>        ::= Ibaga()
-                  | Ibaga(<expr>)
-                  | Ibaga(<expr>, <end_expr>)
-
-<if_statement>  ::= nu "(" <expr> ")" "{" <statement_list> "}"
-                     ( sabali nu "(" <expr> ")" "{" <statement_list> "}" )*
-                     [ sabali "{" <statement_list> "}" ]
-
-<expr>          ::= <comparison>
-<comparison>    ::= <term_add> (( > | < | >= | <= | == | != ) <term_add>)*
-<term_add>      ::= <term_mul> ((+|-) <term_mul>)*
-<term_mul>      ::= <factor> ((*|/|//|%) <factor>)*
-<factor>        ::= "(" <expr> ")" | IDENT | INT | FLOAT | STRING | true | false | Ikabil | Ikabil(<expr>)
-\`\`\`
-
-## 3. Semantic Rules (Current)
-
-- Variables must be declared before use.
-- Variable redeclaration is not allowed.
-- Assignment value must match declared variable type.
-- \`Gudua\` may receive \`Bilang\` values.
-- Variables declared without an initializer get a default value (\`0\` for \`Bilang\`, \`0.0\` for \`Gudua\`, \`""\` for \`Sarsarita\`, \`false\` for \`Pudno\`).
-- \`Ikabil\` returns \`Sarsarita\`.
-- \`Ikabil(prompt)\` requires \`prompt\` to be \`Sarsarita\`.
-- \`Ibaga(...)\` must use parentheses.
-- \`Ibaga(expr)\` prints with a newline by default.
-- \`Ibaga(expr, end)\` prints using \`end\` instead of default newline.
-  - \`end\` must be \`Sarsarita\`.
-  - escape sequences in strings are supported (e.g., \`"\\n"\`, \`"\\t"\`).
-- \`Ibaga()\` prints a blank newline.
-- \`+\` supports:
-  - numeric + numeric
-  - \`Sarsarita\` + \`Sarsarita\`
-- \`-\` and \`*\` require numeric operands.
-- \`/\` requires numeric operands and returns \`Gudua\` (floating-point division).
-- \`//\` requires \`Bilang\` operands and returns \`Bilang\`.
-- \`%\` requires \`Bilang\` operands and returns \`Bilang\`.
-- Literal zero divisors are rejected by semantic analysis:
-  - \`a / 0\`, \`a / 0.0\`
-  - \`a // 0\`
-  - \`a % 0\`
-- \`>\`, \`<\`, \`>=\`, \`<=\` require numeric operands and return \`Pudno\`.
-- \`==\`, \`!=\` require matching types (or both numeric) and return \`Pudno\`.
-- \`nu\` condition must be \`Pudno\`.
-- \`sabali nu\` condition must be \`Pudno\`.
-- \`sabali\` can only appear after \`nu\` or \`sabali nu\`.
-
-## 4. Multi-Declaration
-
-Declare multiple variables of the same type in a single statement, separated by commas.
-Variables without \`dutokan->\` get default values.
-
-\`\`\`text
-Bilang x dutokan-> 10, y dutokan-> 5, z;
-Gudua a dutokan-> 1.5, b;
-Sarsarita first dutokan-> "hello", second;
-Pudno flag dutokan-> true, other;
-\`\`\`
-
-## 5. Conditionals (\`nu\` / \`sabali nu\` / \`sabali\`)
-
-If/else-if/else using \`nu\`, \`sabali nu\`, and \`sabali\`.
-Conditions must be \`Pudno\` (boolean) expressions, typically comparisons.
-Bodies are enclosed in \`{ }\`.
-
-\`\`\`text
-nu (x > 5) {
-    Ibaga("x is greater than 5");
-}
-sabali nu (x == 5) {
-    Ibaga("x is equal to 5");
-}
-sabali {
-    Ibaga("x is less than 5");
-}
-\`\`\`
-
-## 6. Example Program
-
-\`\`\`text
-Sarsarita ngalan dutokan-> Ikabil("Nagan mu: ");
-Sarsarita mom dutokan-> Ikabil("Nagan ni ina mu: ");
-Sarsarita dad dutokan-> Ikabil("Nagan ni ama mu: ");
-Sarsarita sibling dutokan-> Ikabil("Nagan ni Ate o Kuya mu: ");
-
-Bilang x dutokan-> 10, y dutokan-> 5, z;
-Gudua result dutokan-> ((x + y) * 2) / 3;
-Bilang quotient dutokan-> y // 2;
-Bilang rem dutokan-> y % 2;
-
-Ibaga("Nagan mo ay " + ngalan + " anak ni " + mom + " at " + dad + " kapatid ni " + sibling, "\\n");
-Ibaga("result:\\t", "");
-Ibaga(result);
-Ibaga("quotient:\\t", "");
-Ibaga(quotient, "\\t");
-Ibaga(rem, "\\n");
-
-nu (x > y) {
-    Ibaga("x is greater than y");
-}
-sabali nu (x == y) {
-    Ibaga("x is equal to y");
-}
-sabali {
-    Ibaga("x is less than or equal to y");
-}
-\`\`\`
-
-## 7. Common Semantic Errors
-
-- \`Variable 'x' is not declared\`
-  - Declare it first: \`Bilang x dutokan-> 0;\`
-- \`Variable 'x' already declared\`
-  - Remove duplicate declaration or rename variable.
-- \`Type mismatch in declaration/assignment\`
-  - Make expression type compatible with variable type.
-- \`Division by zero is not allowed\`
-  - Change the right-hand divisor from \`0\`/\`0.0\` to a non-zero value.
-- \`If condition must be Pudno, got Bilang\`
-  - Use a comparison expression (e.g., \`x > 0\`) instead of a raw value.
-`;
 
 export default function ReadmeViewer() {
   return (
@@ -194,7 +15,7 @@ export default function ReadmeViewer() {
       <div className="max-w-3xl mx-auto px-6 py-8">
         <div className="panel p-6 rounded-sm readme-content">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {README_CONTENT}
+            {readmeContent}
           </ReactMarkdown>
         </div>
       </div>
