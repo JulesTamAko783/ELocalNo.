@@ -29,6 +29,64 @@ export default function App() {
   const [runtimeError, setRuntimeError] = useState(null);
   const [analysisStatus, setAnalysisStatus] = useState(null);
 
+  // ── Resizable panel sizes ──────────────────────────────────────────────
+  const [editorWidthPct, setEditorWidthPct] = useState(55);   // % of ide-layout
+  const [outputHeight, setOutputHeight] = useState(250);       // px
+  const ideLayoutRef = useRef(null);
+  const ideScrollRef = useRef(null);
+
+  // Vertical drag (editor ↔ analysis)
+  const handleVerticalDrag = useCallback((e) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startPct = editorWidthPct;
+    const container = ideLayoutRef.current;
+    if (!container) return;
+    const containerWidth = container.getBoundingClientRect().width;
+
+    const onMove = (ev) => {
+      const dx = ev.clientX - startX;
+      const newPct = startPct + (dx / containerWidth) * 100;
+      setEditorWidthPct(Math.min(80, Math.max(20, newPct)));
+    };
+    const onUp = () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  }, [editorWidthPct]);
+
+  // Horizontal drag (top row ↔ output)
+  const handleHorizontalDrag = useCallback((e) => {
+    e.preventDefault();
+    const startY = e.clientY;
+    const startHeight = outputHeight;
+    const container = ideScrollRef.current;
+    if (!container) return;
+    const containerHeight = container.getBoundingClientRect().height;
+
+    const onMove = (ev) => {
+      const dy = startY - ev.clientY; // dragging up = bigger output
+      const newHeight = startHeight + dy;
+      setOutputHeight(Math.min(containerHeight * 0.7, Math.max(120, newHeight)));
+    };
+    const onUp = () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    document.body.style.cursor = 'row-resize';
+    document.body.style.userSelect = 'none';
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  }, [outputHeight]);
+
   // Debounced live lexer
   const debounceRef = useRef(null);
   useEffect(() => {
@@ -98,16 +156,19 @@ export default function App() {
     <div className="app-shell">
       <Navbar currentView={currentView} onViewChange={setCurrentView} />
 
-      <div className="ide-scroll-area">
+      <div className="ide-scroll-area" ref={ideScrollRef}>
         {/* Editor + Analysis: side-by-side on desktop, stacked on mobile/tablet */}
-        <div className="ide-layout">
+        <div className="ide-layout" ref={ideLayoutRef}>
           {/* Code Editor */}
-          <div className="editor-pane">
+          <div className="editor-pane" style={{ width: `${editorWidthPct}%` }}>
             <EditorPanel code={code} onCodeChange={setCode} onRun={handleRun} />
           </div>
 
+          {/* Vertical resize handle */}
+          <div className="resize-handle-v" onMouseDown={handleVerticalDrag} />
+
           {/* Analysis panels */}
-          <div className="analysis-pane">
+          <div className="analysis-pane" style={{ width: `${100 - editorWidthPct}%` }}>
             {/* Tab bar */}
             <div className="panel-header flex items-center gap-0 px-2 py-0">
               {tabs.map((tab) => (
@@ -134,11 +195,11 @@ export default function App() {
           </div>
         </div>
 
-        {/* Wave divider */}
-        <div className="divider-wave" aria-hidden="true"></div>
+        {/* Horizontal resize handle */}
+        <div className="resize-handle-h" onMouseDown={handleHorizontalDrag} />
 
         {/* Output panel */}
-        <div className="output-pane panel">
+        <div className="output-pane panel" style={{ height: `${outputHeight}px` }}>
           <OutputPanel
             code={code}
             output={output}

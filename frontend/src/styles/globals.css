@@ -86,18 +86,18 @@ code, pre, .editor, .mono { font-family: 'Fira Code', monospace; }
 }
 
 .editor-pane {
-  width: 50%;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid var(--border-color);
+  flex-shrink: 0;
 }
 
 .analysis-pane {
-  width: 50%;
   min-height: 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
+  flex: 1;
 }
 
 .analysis-content {
@@ -107,10 +107,50 @@ code, pre, .editor, .mono { font-family: 'Fira Code', monospace; }
 }
 
 .output-pane {
-  height: 200px;
   min-height: 120px;
-  border-top: 1px solid var(--border-color);
   flex-shrink: 0;
+}
+
+/* ── Resize handles ─────────────────────────────────────────────────────── */
+
+.resize-handle-v {
+  width: 6px;
+  cursor: col-resize;
+  background-color: var(--border-color);
+  flex-shrink: 0;
+  position: relative;
+  transition: background-color 0.15s;
+}
+
+.resize-handle-v:hover,
+.resize-handle-v:active {
+  background-color: var(--color-clay);
+}
+
+.resize-handle-v::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 1px;
+  width: 4px;
+  height: 32px;
+  transform: translateY(-50%);
+  border-left: 1px solid rgba(255,255,255,0.2);
+  border-right: 1px solid rgba(255,255,255,0.2);
+}
+
+.resize-handle-h {
+  height: 6px;
+  cursor: row-resize;
+  background-color: var(--border-color);
+  flex-shrink: 0;
+  position: relative;
+  transition: background-color 0.15s;
+}
+
+.resize-handle-h:hover,
+.resize-handle-h:active {
+  background-color: var(--color-clay);
 }
 
 /* ── Inabel texture overlay ──────────────────────────────────────────────── */
@@ -330,7 +370,7 @@ code, pre, .editor, .mono { font-family: 'Fira Code', monospace; }
   }
 
   .editor-pane {
-    width: 100%;
+    width: 100% !important;
     height: 45vh;
     min-height: 280px;
     border-right: none;
@@ -338,7 +378,7 @@ code, pre, .editor, .mono { font-family: 'Fira Code', monospace; }
   }
 
   .analysis-pane {
-    width: 100%;
+    width: 100% !important;
     flex: none;
   }
 
@@ -349,8 +389,13 @@ code, pre, .editor, .mono { font-family: 'Fira Code', monospace; }
   }
 
   .output-pane {
-    height: auto;
+    height: auto !important;
     min-height: 150px;
+  }
+
+  .resize-handle-v,
+  .resize-handle-h {
+    display: none;
   }
 }
 
