@@ -32,13 +32,16 @@ Ibaga(rem);
 Pudno estudyante dutokan-> true;
 
 nu (edad >= 18) {
-    Ibaga("Mayor de edad ka!");
+    Sarsarita label dutokan-> "Mayor de edad ka!";
+    Ibaga(label);
     nu (estudyante == true) {
-        Ibaga("Estudyante ka pay laeng.");
+        Sarsarita detail dutokan-> "Estudyante ka pay laeng.";
+        Ibaga(detail);
     }
 }
 sabali {
-    Ibaga("Ubing ka pay.");
+    Sarsarita label dutokan-> "Ubing ka pay.";
+    Ibaga(label);
 }
 `,
   },
@@ -54,6 +57,7 @@ z dutokan-> 69;
 Gudua result dutokan-> ((x + y) * 2) / 3;
 Bilang quotient dutokan-> y // 2;
 Bilang rem dutokan-> y % 2;
+Pudno passed dutokan-> true;
 
 Ibaga("Nagan mo ay " + ngalan + " anak ni " + mom + " at " + dad + " kapatid ni " + sibling, "\\n");
 Ibaga("result:\\t", "");
@@ -63,14 +67,23 @@ Ibaga(quotient, "\\t");
 Ibaga(rem, "\\n");
 
 nu (x > y) {
+    Sarsarita greeting dutokan-> "Kumusta, " + ngalan + "!";
+    Ibaga(greeting);
     Ibaga("x is greater than y, z is equal to ", "");
     Ibaga(z);
+
+    nu (passed == true) {
+        Sarsarita status dutokan-> "Nakapasa!";
+        Ibaga(status);
+    }
 }
 sabali nu (x == y) {
-    Ibaga("x is equal to y");
+    Sarsarita msg dutokan-> "Agpada da x ken y";
+    Ibaga(msg);
 }
 sabali {
-    Ibaga("x is less than or equal to y");
+    Sarsarita msg dutokan-> "Nababbaba ti x ngem y";
+    Ibaga(msg);
 }
 `,
   },

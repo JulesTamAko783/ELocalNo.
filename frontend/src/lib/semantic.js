@@ -114,7 +114,8 @@ export function analyze(ast) {
     }
 
     currentScope()[stmt.name] = stmt.varType;
-    const scope = scopeStack.length === 1 ? 'global' : 'local';
+    const level = scopeStack.length - 1;
+    const scope = level === 0 ? 'Level 0 (Global)' : `Level ${level} (Local)`;
     symbolTable.push({
       name: stmt.name,
       varType: stmt.varType,

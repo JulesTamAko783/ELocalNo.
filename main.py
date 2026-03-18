@@ -440,7 +440,8 @@ class SemanticAnalyzer:
                 )
 
         self.current_scope()[statement.name] = statement.var_type
-        scope = "global" if len(self.scope_stack) == 1 else "local"
+        level = len(self.scope_stack) - 1
+        scope = "Level 0 (Global)" if level == 0 else f"Level {level} (Local)"
         self.symbol_table.append(SymbolEntry(
             name=statement.name,
             var_type=statement.var_type,
