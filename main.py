@@ -104,6 +104,7 @@ Statement = Union[Declaration, Assignment, Output, IfStatement]
 class SymbolEntry:
     name: str
     var_type: str
+    scope: str
     line: int
     column: int
 
@@ -382,8 +383,28 @@ class Parser:
 
 class SemanticAnalyzer:
     def __init__(self):
-        self.symbols: Dict[str, str] = {}
+        self.scope_stack: List[Dict[str, str]] = [{}]  # stack of scope maps
         self.symbol_table: List[SymbolEntry] = []
+
+    @property
+    def symbols(self) -> Dict[str, str]:
+        """Flat view of global scope for backward compatibility."""
+        return self.scope_stack[0]
+
+    def current_scope(self) -> Dict[str, str]:
+        return self.scope_stack[-1]
+
+    def push_scope(self) -> None:
+        self.scope_stack.append({})
+
+    def pop_scope(self) -> None:
+        self.scope_stack.pop()
+
+    def lookup_symbol(self, name: str):
+        for scope in reversed(self.scope_stack):
+            if name in scope:
+                return scope[name]
+        return None
 
     def analyze(self, statements: List[Statement]) -> None:
         for statement in statements:
@@ -405,34 +426,38 @@ class SemanticAnalyzer:
                 self.analyze_if_statement(statement)
 
     def analyze_declaration(self, statement: Declaration) -> None:
-        if statement.name in self.symbols:
+        if statement.name in self.current_scope():
             self.error(statement.token, f"Variable {statement.name!r} already declared")
 
         if statement.expr is not None:
             expr_type = self.infer_expr_type(statement.expr)
-            if not self.is_assignable(statement.var_type, expr_type):
+            # InputExpr (Ikabil) returns Sarsarita but is coerced to the target type at runtime
+            if not isinstance(statement.expr, InputExpr) and not self.is_assignable(statement.var_type, expr_type):
                 self.error(
                     statement.token,
                     f"Type mismatch in declaration of {statement.name!r}: "
                     f"expected {statement.var_type}, got {expr_type}",
                 )
 
-        self.symbols[statement.name] = statement.var_type
+        self.current_scope()[statement.name] = statement.var_type
+        scope = "global" if len(self.scope_stack) == 1 else "local"
         self.symbol_table.append(SymbolEntry(
             name=statement.name,
             var_type=statement.var_type,
+            scope=scope,
             line=statement.token.line,
             column=statement.token.column,
         ))
 
     def analyze_assignment(self, statement: Assignment) -> None:
-        if statement.name not in self.symbols:
+        if self.lookup_symbol(statement.name) is None:
             self.error(statement.token, f"Variable {statement.name!r} is not declared")
 
-        var_type = self.symbols[statement.name]
+        var_type = self.lookup_symbol(statement.name)
         expr_type = self.infer_expr_type(statement.expr)
 
-        if not self.is_assignable(var_type, expr_type):
+        # InputExpr (Ikabil) returns Sarsarita but is coerced to the target type at runtime
+        if not isinstance(statement.expr, InputExpr) and not self.is_assignable(var_type, expr_type):
             self.error(
                 statement.token,
                 f"Type mismatch in assignment to {statement.name!r}: "
@@ -443,14 +468,20 @@ class SemanticAnalyzer:
         cond_type = self.infer_expr_type(stmt.condition)
         if cond_type != TYPE_BOOL:
             self.error(stmt.token, f"If condition must be {TYPE_BOOL}, got {cond_type}")
+        self.push_scope()
         self.analyze(stmt.body)
+        self.pop_scope()
         for elif_branch in stmt.elif_branches:
             cond_type = self.infer_expr_type(elif_branch.condition)
             if cond_type != TYPE_BOOL:
                 self.error(elif_branch.token, f"Else-if condition must be {TYPE_BOOL}, got {cond_type}")
+            self.push_scope()
             self.analyze(elif_branch.body)
+            self.pop_scope()
         if stmt.else_body is not None:
+            self.push_scope()
             self.analyze(stmt.else_body)
+            self.pop_scope()
 
     def infer_expr_type(self, expr: Expr) -> str:
         if isinstance(expr, Literal):
@@ -463,9 +494,9 @@ class SemanticAnalyzer:
             return TYPE_BOOL
 
         if isinstance(expr, Identifier):
-            if expr.name not in self.symbols:
+            if self.lookup_symbol(expr.name) is None:
                 self.error(expr.token, f"Variable {expr.name!r} is not declared")
-            return self.symbols[expr.name]
+            return self.lookup_symbol(expr.name)
 
         if isinstance(expr, InputExpr):
             if expr.prompt is not None:

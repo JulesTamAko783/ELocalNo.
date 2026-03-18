@@ -66,9 +66,28 @@ function processEscapes(str) {
  * @returns {{ output: string, error: string|null }}
  */
 export function interpret(ast, inputLines = []) {
-  const variables = {};     // name → { value, type }
+  const scopeStack = [{}];  // stack of scope maps; scopeStack[0] is global
   const outputParts = [];   // collected output strings
   let inputIndex = 0;
+
+  function currentScope() {
+    return scopeStack[scopeStack.length - 1];
+  }
+
+  function pushScope() {
+    scopeStack.push({});
+  }
+
+  function popScope() {
+    scopeStack.pop();
+  }
+
+  function lookupVar(name) {
+    for (let i = scopeStack.length - 1; i >= 0; i--) {
+      if (scopeStack[i][name] !== undefined) return scopeStack[i][name];
+    }
+    return undefined;
+  }
 
   function runtimeError(token, message) {
     throw new InterpreterError(`${message} at line ${token.line}, column ${token.column}`);
@@ -107,7 +126,7 @@ export function interpret(ast, inputLines = []) {
   }
 
   function evalIdentifier(expr) {
-    const entry = variables[expr.name];
+    const entry = lookupVar(expr.name);
     if (!entry) {
       runtimeError(expr.token, `Variable '${expr.name}' is not declared`);
     }
@@ -222,11 +241,11 @@ export function interpret(ast, inputLines = []) {
     } else {
       value = DEFAULTS[type];
     }
-    variables[stmt.name] = { value, type };
+    currentScope()[stmt.name] = { value, type };
   }
 
   function execAssignment(stmt) {
-    const entry = variables[stmt.name];
+    const entry = lookupVar(stmt.name);
     const result = evalExpr(stmt.expr);
     entry.value = coerce(result.value, result.type, entry.type);
   }
@@ -255,28 +274,38 @@ export function interpret(ast, inputLines = []) {
   function execIfStatement(stmt) {
     const cond = evalExpr(stmt.condition);
     if (cond.value) {
+      pushScope();
       execStatements(stmt.body);
+      popScope();
       return;
     }
 
     for (const branch of stmt.elifBranches) {
       const branchCond = evalExpr(branch.condition);
       if (branchCond.value) {
+        pushScope();
         execStatements(branch.body);
+        popScope();
         return;
       }
     }
 
     if (stmt.elseBody !== null) {
+      pushScope();
       execStatements(stmt.elseBody);
+      popScope();
     }
   }
 
-  // ── Type coercion (Bilang → Gudua) ───────────────────────────────────
+  // ── Type coercion ────────────────────────────────────────────────────
 
   function coerce(value, fromType, toType) {
     if (fromType === toType) return value;
     if (toType === TYPE_FLOAT && fromType === TYPE_INT) return Number(value);
+    // Coerce Sarsarita (string) from Ikabil input to the target type
+    if (fromType === TYPE_STRING && toType === TYPE_INT) return parseInt(value, 10) || 0;
+    if (fromType === TYPE_STRING && toType === TYPE_FLOAT) return parseFloat(value) || 0.0;
+    if (fromType === TYPE_STRING && toType === TYPE_BOOL) return value.toLowerCase() === 'true';
     return value;
   }
 

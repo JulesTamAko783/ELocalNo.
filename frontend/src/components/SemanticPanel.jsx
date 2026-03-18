@@ -71,7 +71,7 @@ export default function SemanticPanel({ symbolTable, errors }) {
                 <tr key={i} className="border-b border-[rgba(139,115,85,0.15)] hover:bg-[rgba(139,115,85,0.06)]">
                   <td className="py-0.5 pr-2 text-[var(--color-terraces)] font-semibold">{entry.name}</td>
                   <td className="py-0.5 pr-2 tok-keyword">{entry.varType}</td>
-                  <td className="py-0.5 pr-2 text-[var(--color-stone)]">global</td>
+                  <td className="py-0.5 pr-2 text-[var(--color-stone)]">{entry.scope || 'global'}</td>
                   <td className="py-0.5 pr-2 text-[var(--color-stone)]">{entry.line}</td>
                   <td className="py-0.5 text-[var(--color-stone)]">{entry.column}</td>
                 </tr>

@@ -48,9 +48,28 @@ function isZeroIntLiteral(expr) {
  *   errors: list of human-readable error strings (empty = pass)
  */
 export function analyze(ast) {
-  const symbols = {};          // name → Elokano type string
+  const scopeStack = [{}];     // stack of scope maps; scopeStack[0] is global
   const symbolTable = [];      // ordered list of declarations
   const errors = [];           // collected error messages
+
+  function currentScope() {
+    return scopeStack[scopeStack.length - 1];
+  }
+
+  function pushScope() {
+    scopeStack.push({});
+  }
+
+  function popScope() {
+    scopeStack.pop();
+  }
+
+  function lookupSymbol(name) {
+    for (let i = scopeStack.length - 1; i >= 0; i--) {
+      if (scopeStack[i][name] !== undefined) return scopeStack[i][name];
+    }
+    return undefined;
+  }
 
   function addError(token, message) {
     errors.push(`${message} at line ${token.line}, column ${token.column}`);
@@ -78,14 +97,15 @@ export function analyze(ast) {
   }
 
   function analyzeDeclaration(stmt) {
-    if (symbols[stmt.name] !== undefined) {
+    if (currentScope()[stmt.name] !== undefined) {
       addError(stmt.token, `Variable ${JSON.stringify(stmt.name)} already declared`);
       return;
     }
 
     if (stmt.expr !== null) {
       const exprType = inferExprType(stmt.expr);
-      if (exprType && !isAssignable(stmt.varType, exprType)) {
+      // InputExpr (Ikabil) returns Sarsarita but is coerced to the target type at runtime
+      if (exprType && stmt.expr.nodeType !== 'InputExpr' && !isAssignable(stmt.varType, exprType)) {
         addError(
           stmt.token,
           `Type mismatch in declaration of ${JSON.stringify(stmt.name)}: expected ${stmt.varType}, got ${exprType}`
@@ -93,25 +113,28 @@ export function analyze(ast) {
       }
     }
 
-    symbols[stmt.name] = stmt.varType;
+    currentScope()[stmt.name] = stmt.varType;
+    const scope = scopeStack.length === 1 ? 'global' : 'local';
     symbolTable.push({
       name: stmt.name,
       varType: stmt.varType,
+      scope,
       line: stmt.token.line,
       column: stmt.token.column,
     });
   }
 
   function analyzeAssignment(stmt) {
-    if (symbols[stmt.name] === undefined) {
+    if (lookupSymbol(stmt.name) === undefined) {
       addError(stmt.token, `Variable ${JSON.stringify(stmt.name)} is not declared`);
       return;
     }
 
-    const varType = symbols[stmt.name];
+    const varType = lookupSymbol(stmt.name);
     const exprType = inferExprType(stmt.expr);
 
-    if (exprType && !isAssignable(varType, exprType)) {
+    // InputExpr (Ikabil) returns Sarsarita but is coerced to the target type at runtime
+    if (exprType && stmt.expr.nodeType !== 'InputExpr' && !isAssignable(varType, exprType)) {
       addError(
         stmt.token,
         `Type mismatch in assignment to ${JSON.stringify(stmt.name)}: expected ${varType}, got ${exprType}`
@@ -136,18 +159,24 @@ export function analyze(ast) {
     if (condType && condType !== TYPE_BOOL) {
       addError(stmt.token, `If condition must be ${TYPE_BOOL}, got ${condType}`);
     }
+    pushScope();
     analyzeStatements(stmt.body);
+    popScope();
 
     for (const branch of stmt.elifBranches) {
       const branchCondType = inferExprType(branch.condition);
       if (branchCondType && branchCondType !== TYPE_BOOL) {
         addError(branch.token, `Else-if condition must be ${TYPE_BOOL}, got ${branchCondType}`);
       }
+      pushScope();
       analyzeStatements(branch.body);
+      popScope();
     }
 
     if (stmt.elseBody !== null) {
+      pushScope();
       analyzeStatements(stmt.elseBody);
+      popScope();
     }
   }
 
@@ -162,11 +191,11 @@ export function analyze(ast) {
     }
 
     if (expr.nodeType === 'Identifier') {
-      if (symbols[expr.name] === undefined) {
+      if (lookupSymbol(expr.name) === undefined) {
         addError(expr.token, `Variable ${JSON.stringify(expr.name)} is not declared`);
         return null;
       }
-      return symbols[expr.name];
+      return lookupSymbol(expr.name);
     }
 
     if (expr.nodeType === 'InputExpr') {
@@ -254,5 +283,7 @@ export function analyze(ast) {
 
   analyzeStatements(ast);
 
+  // Build flat symbols map from global scope for backward compatibility
+  const symbols = scopeStack[0];
   return { symbols, symbolTable, errors };
 }
