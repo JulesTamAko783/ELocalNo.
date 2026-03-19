@@ -135,6 +135,17 @@ export default function App() {
     setRuntimeError(interpResult.error);
   }, [code, inputLines]);
 
+  // Receive analysis results from ConsolePanel so Lexer/Parser/Semantic tabs update
+  const handleConsoleAnalysis = useCallback((results) => {
+    if (results.tokens !== undefined) setTokens(results.tokens);
+    if (results.lexerError !== undefined) setLexerError(results.lexerError);
+    if (results.ast !== undefined) setAst(results.ast);
+    if (results.parseError !== undefined) setParseError(results.parseError);
+    if (results.symbolTable !== undefined) setSymbolTable(results.symbolTable);
+    if (results.semanticErrors !== undefined) setSemanticErrors(results.semanticErrors);
+    if (results.analysisStatus !== undefined) setAnalysisStatus(results.analysisStatus);
+  }, []);
+
   const tabs = [
     { id: 'lexer', label: 'Lexer', icon: '\uD83E\uDEA8' },
     { id: 'parser', label: 'Parser', icon: '\uD83C\uDF3E' },
@@ -208,6 +219,7 @@ export default function App() {
             onRun={handleRun}
             inputLines={inputLines}
             onInputChange={setInputLines}
+            onConsoleAnalysis={handleConsoleAnalysis}
           />
         </div>
       </div>

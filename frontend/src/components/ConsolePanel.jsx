@@ -8,7 +8,7 @@ import { interpretAsync } from '../lib/interpreterAsync';
  * Interactive console panel — terminal-like execution with live Ikabil input.
  */
 
-export default function ConsolePanel({ code }) {
+export default function ConsolePanel({ code, onAnalysisResults }) {
   const [consoleText, setConsoleText] = useState('');
   const [waitingForInput, setWaitingForInput] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -42,6 +42,9 @@ export default function ConsolePanel({ code }) {
 
     // Compile
     const lexResult = tokenize(code);
+    if (onAnalysisResults) {
+      onAnalysisResults({ tokens: lexResult.tokens, lexerError: lexResult.error });
+    }
     if (lexResult.error) {
       setError(lexResult.error);
       setRunning(false);
@@ -49,6 +52,9 @@ export default function ConsolePanel({ code }) {
     }
 
     const parseResult = parse(lexResult.tokens);
+    if (onAnalysisResults) {
+      onAnalysisResults({ tokens: lexResult.tokens, lexerError: null, ast: parseResult.ast, parseError: parseResult.error });
+    }
     if (parseResult.error) {
       setError(parseResult.error);
       setRunning(false);
@@ -56,6 +62,14 @@ export default function ConsolePanel({ code }) {
     }
 
     const semResult = analyze(parseResult.ast);
+    if (onAnalysisResults) {
+      onAnalysisResults({
+        tokens: lexResult.tokens, lexerError: null,
+        ast: parseResult.ast, parseError: null,
+        symbolTable: semResult.symbolTable, semanticErrors: semResult.errors,
+        analysisStatus: semResult.errors.length > 0 ? 'fail' : 'pass',
+      });
+    }
     if (semResult.errors.length > 0) {
       setError(semResult.errors.join('\n'));
       setRunning(false);

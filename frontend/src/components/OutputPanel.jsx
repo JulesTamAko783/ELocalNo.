@@ -6,7 +6,7 @@ import ConsolePanel from './ConsolePanel';
  * Includes tabs to switch between Output and Console modes.
  */
 
-export default function OutputPanel({ code, output, runtimeError, analysisStatus, onRun, inputLines, onInputChange }) {
+export default function OutputPanel({ code, output, runtimeError, analysisStatus, onRun, inputLines, onInputChange, onConsoleAnalysis }) {
   const [showInput, setShowInput] = useState(false);
   const [activeTab, setActiveTab] = useState('output');
 
@@ -117,7 +117,7 @@ export default function OutputPanel({ code, output, runtimeError, analysisStatus
 
       {/* Console tab content */}
       {activeTab === 'console' && (
-        <ConsolePanel code={code} />
+        <ConsolePanel code={code} onAnalysisResults={onConsoleAnalysis} />
       )}
     </div>
   );
