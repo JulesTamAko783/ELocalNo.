@@ -253,13 +253,15 @@ export default function TestScenariosPanel({ onLoadInEditor }) {
   const passed = results.filter(r => r.result.passed).length;
   const failed = total - passed;
   const validCount = results.filter(r => r.scenario.expectedPhase === 'valid').length;
-  const syntaxCount = results.filter(r => r.scenario.expectedPhase === 'lexer' || r.scenario.expectedPhase === 'parser').length;
+  const lexerCount = results.filter(r => r.scenario.expectedPhase === 'lexer').length;
+  const parserCount = results.filter(r => r.scenario.expectedPhase === 'parser').length;
   const semanticCount = results.filter(r => r.scenario.expectedPhase === 'semantic').length;
 
   const filtered = useMemo(() => {
     let list = results;
     if (filter === 'valid') list = list.filter(r => r.scenario.expectedPhase === 'valid');
-    else if (filter === 'syntax') list = list.filter(r => r.scenario.expectedPhase === 'lexer' || r.scenario.expectedPhase === 'parser');
+    else if (filter === 'lexer') list = list.filter(r => r.scenario.expectedPhase === 'lexer');
+    else if (filter === 'parser') list = list.filter(r => r.scenario.expectedPhase === 'parser');
     else if (filter === 'semantic') list = list.filter(r => r.scenario.expectedPhase === 'semantic');
     else if (filter === 'pass') list = list.filter(r => r.result.passed);
     else if (filter === 'fail') list = list.filter(r => !r.result.passed);
@@ -282,7 +284,8 @@ export default function TestScenariosPanel({ onLoadInEditor }) {
   const filters = [
     { id: 'all', label: `All (${total})` },
     { id: 'valid', label: `Valid (${validCount})` },
-    { id: 'syntax', label: `Syntax Errors (${syntaxCount})` },
+    { id: 'lexer', label: `Lexer Errors (${lexerCount})` },
+    { id: 'parser', label: `Parser Errors (${parserCount})` },
     { id: 'semantic', label: `Semantic Errors (${semanticCount})` },
     { id: 'pass', label: `Passed (${passed})` },
     { id: 'fail', label: `Failed (${failed})` },
@@ -306,7 +309,7 @@ export default function TestScenariosPanel({ onLoadInEditor }) {
           Test Scenarios
         </h1>
         <p style={{ color: 'var(--color-stone)', fontSize: '0.85rem' }}>
-          110 automated tests for Lexer, Parser, and Semantic Analyzer
+          140 automated tests for Lexer, Parser, and Semantic Analyzer
         </p>
       </div>
 

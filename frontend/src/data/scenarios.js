@@ -454,6 +454,129 @@ const SCENARIOS = [
   { id: 110, title: "Assigning Gudua to Sarsarita",
     code: 'Gudua x dutokan-> 3.14;\nSarsarita s dutokan-> x;',
     expectedPhase: "semantic", expectedOutcome: "Type mismatch: expected Sarsarita, got Gudua" },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SECTION D: LEXICAL ERRORS (111–140)
+  // ═══════════════════════════════════════════════════════════════════════════
+  { id: 111, title: "Hash character (#) is not recognized",
+    code: 'Bilang x dutokan-> 10;\n# this is not a comment',
+    expectedPhase: "lexer", expectedOutcome: "Unexpected character #" },
+
+  { id: 112, title: "Dollar sign ($) is not a valid token",
+    code: 'Bilang $price dutokan-> 100;',
+    expectedPhase: "lexer", expectedOutcome: "Unexpected character $" },
+
+  { id: 113, title: "Ampersand (&) is not a valid operator",
+    code: 'Pudno result dutokan-> true & false;',
+    expectedPhase: "lexer", expectedOutcome: "Unexpected character &" },
+
+  { id: 114, title: "Double ampersand (&&) - no logical AND operator",
+    code: 'Pudno result dutokan-> true && false;',
+    expectedPhase: "lexer", expectedOutcome: "Unexpected character &" },
+
+  { id: 115, title: "Pipe (|) is not a valid operator",
+    code: 'Pudno result dutokan-> true | false;',
+    expectedPhase: "lexer", expectedOutcome: "Unexpected character |" },
+
+  { id: 116, title: "Double pipe (||) - no logical OR operator",
+    code: 'Pudno result dutokan-> true || false;',
+    expectedPhase: "lexer", expectedOutcome: "Unexpected character |" },
+
+  { id: 117, title: "Tilde (~) is not a valid operator",
+    code: 'Bilang x dutokan-> ~5;',
+    expectedPhase: "lexer", expectedOutcome: "Unexpected character ~" },
+
+  { id: 118, title: "Caret (^) is not a valid operator",
+    code: 'Bilang x dutokan-> 2 ^ 3;',
+    expectedPhase: "lexer", expectedOutcome: "Unexpected character ^" },
+
+  { id: 119, title: "Backtick (`) is not a valid delimiter",
+    code: 'Sarsarita s dutokan-> `hello`;',
+    expectedPhase: "lexer", expectedOutcome: "Unexpected character `" },
+
+  { id: 120, title: "Single quote (') is not a valid string delimiter",
+    code: "Sarsarita s dutokan-> 'hello';",
+    expectedPhase: "lexer", expectedOutcome: "Unexpected character '" },
+
+  { id: 121, title: "Exclamation mark (!) alone without =",
+    code: 'Pudno x dutokan-> !true;',
+    expectedPhase: "lexer", expectedOutcome: "Unexpected character !" },
+
+  { id: 122, title: "Single equals (=) is not an assignment or comparison",
+    code: 'Bilang x = 10;',
+    expectedPhase: "lexer", expectedOutcome: "Unexpected character =" },
+
+  { id: 123, title: "Backslash (\\) outside of a string literal",
+    code: 'Bilang x dutokan-> 10\\2;',
+    expectedPhase: "lexer", expectedOutcome: "Unexpected character \\" },
+
+  { id: 124, title: "Question mark (?) is not a valid token",
+    code: 'Bilang x dutokan-> 5 ? 10;',
+    expectedPhase: "lexer", expectedOutcome: "Unexpected character ?" },
+
+  { id: 125, title: "Colon (:) is not a valid token",
+    code: 'Bilang x: 10;',
+    expectedPhase: "lexer", expectedOutcome: "Unexpected character :" },
+
+  { id: 126, title: "Dot (.) alone is not a valid token",
+    code: 'Bilang x dutokan-> 10.;',
+    expectedPhase: "lexer", expectedOutcome: "Unexpected character ." },
+
+  { id: 127, title: "Unterminated string at end of file",
+    code: 'Sarsarita msg dutokan-> "hello',
+    expectedPhase: "lexer", expectedOutcome: "Unterminated string at end of file" },
+
+  { id: 128, title: "Unterminated string with escape at end",
+    code: 'Sarsarita msg dutokan-> "hello\\',
+    expectedPhase: "lexer", expectedOutcome: "Unterminated string" },
+
+  { id: 129, title: "At sign (@) in an expression",
+    code: 'Bilang x dutokan-> 5 @ 3;',
+    expectedPhase: "lexer", expectedOutcome: "Unexpected character @" },
+
+  { id: 130, title: "Square bracket ([) is not a valid delimiter",
+    code: 'Bilang x dutokan-> [10];',
+    expectedPhase: "lexer", expectedOutcome: "Unexpected character [" },
+
+  { id: 131, title: "Square bracket (]) is not a valid delimiter",
+    code: 'Bilang arr] dutokan-> 10;',
+    expectedPhase: "lexer", expectedOutcome: "Unexpected character ]" },
+
+  { id: 132, title: "Double dollar sign ($$) in variable name",
+    code: 'Bilang $$x dutokan-> 5;',
+    expectedPhase: "lexer", expectedOutcome: "Unexpected character $" },
+
+  { id: 133, title: "Unicode special character in source",
+    code: 'Bilang x dutokan-> 10 \u00A9 5;',
+    expectedPhase: "lexer", expectedOutcome: "Unexpected character" },
+
+  { id: 134, title: "Multiple invalid characters in one line",
+    code: 'Bilang x dutokan-> @#$;',
+    expectedPhase: "lexer", expectedOutcome: "Unexpected character @ (first invalid char stops lexer)" },
+
+  { id: 135, title: "Semicolon-like character (Greek question mark \u037E)",
+    code: 'Bilang x dutokan-> 10\u037E',
+    expectedPhase: "lexer", expectedOutcome: "Unexpected character (looks like ; but is not)" },
+
+  { id: 136, title: "Plus-equals (+=) is not a valid operator",
+    code: 'Bilang x dutokan-> 10;\nx += 5;',
+    expectedPhase: "lexer", expectedOutcome: "Unexpected character = after +" },
+
+  { id: 137, title: "Arrow (->) without dutokan prefix",
+    code: 'Bilang x -> 10;',
+    expectedPhase: "parser", expectedOutcome: "- is MINUS, > is GT — parsed as invalid expression context" },
+
+  { id: 138, title: "Double string literal (missing operator between)",
+    code: 'Sarsarita x dutokan-> "hello" "world";',
+    expectedPhase: "parser", expectedOutcome: "Two string literals without an operator between them" },
+
+  { id: 139, title: "Empty source code",
+    code: '',
+    expectedPhase: "valid", expectedOutcome: "Empty program is valid (no statements)" },
+
+  { id: 140, title: "Only whitespace and newlines",
+    code: '   \n  \n   ',
+    expectedPhase: "valid", expectedOutcome: "Whitespace-only program is valid" },
 ];
 
 export default SCENARIOS;

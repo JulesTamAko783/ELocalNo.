@@ -465,6 +465,129 @@ SCENARIOS = [
     (110, "Assigning Gudua to Sarsarita",
      'Gudua x dutokan-> 3.14;\nSarsarita s dutokan-> x;',
      "semantic", "Type mismatch: expected Sarsarita, got Gudua"),
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # SECTION D: LEXICAL ERRORS (Scenarios 111–140)
+    # ══════════════════════════════════════════════════════════════════════════
+    (111, "Hash character (#) is not recognized",
+     'Bilang x dutokan-> 10;\n# this is not a comment',
+     "lexer", "Unexpected character #"),
+
+    (112, "Dollar sign ($) is not a valid token",
+     'Bilang $price dutokan-> 100;',
+     "lexer", "Unexpected character $"),
+
+    (113, "Ampersand (&) is not a valid operator",
+     'Pudno result dutokan-> true & false;',
+     "lexer", "Unexpected character &"),
+
+    (114, "Double ampersand (&&) - no logical AND operator",
+     'Pudno result dutokan-> true && false;',
+     "lexer", "Unexpected character &"),
+
+    (115, "Pipe (|) is not a valid operator",
+     'Pudno result dutokan-> true | false;',
+     "lexer", "Unexpected character |"),
+
+    (116, "Double pipe (||) - no logical OR operator",
+     'Pudno result dutokan-> true || false;',
+     "lexer", "Unexpected character |"),
+
+    (117, "Tilde (~) is not a valid operator",
+     'Bilang x dutokan-> ~5;',
+     "lexer", "Unexpected character ~"),
+
+    (118, "Caret (^) is not a valid operator",
+     'Bilang x dutokan-> 2 ^ 3;',
+     "lexer", "Unexpected character ^"),
+
+    (119, "Backtick (`) is not a valid delimiter",
+     'Sarsarita s dutokan-> `hello`;',
+     "lexer", "Unexpected character `"),
+
+    (120, "Single quote (') is not a valid string delimiter",
+     "Sarsarita s dutokan-> 'hello';",
+     "lexer", "Unexpected character '"),
+
+    (121, "Exclamation mark (!) alone without =",
+     'Pudno x dutokan-> !true;',
+     "lexer", "Unexpected character !"),
+
+    (122, "Single equals (=) is not an assignment or comparison",
+     'Bilang x = 10;',
+     "lexer", "Unexpected character ="),
+
+    (123, "Backslash (\\) outside of a string literal",
+     'Bilang x dutokan-> 10\\2;',
+     "lexer", "Unexpected character \\"),
+
+    (124, "Question mark (?) is not a valid token",
+     'Bilang x dutokan-> 5 ? 10;',
+     "lexer", "Unexpected character ?"),
+
+    (125, "Colon (:) is not a valid token",
+     'Bilang x: 10;',
+     "lexer", "Unexpected character :"),
+
+    (126, "Dot (.) alone is not a valid token",
+     'Bilang x dutokan-> 10.;',
+     "lexer", "Unexpected character ."),
+
+    (127, "Unterminated string at end of file",
+     'Sarsarita msg dutokan-> "hello',
+     "lexer", "Unterminated string at end of file"),
+
+    (128, "Unterminated string with escape at end",
+     'Sarsarita msg dutokan-> "hello\\',
+     "lexer", "Unterminated string"),
+
+    (129, "At sign (@) in an expression",
+     'Bilang x dutokan-> 5 @ 3;',
+     "lexer", "Unexpected character @"),
+
+    (130, "Square bracket ([) is not a valid delimiter",
+     'Bilang x dutokan-> [10];',
+     "lexer", "Unexpected character ["),
+
+    (131, "Square bracket (]) is not a valid delimiter",
+     'Bilang arr] dutokan-> 10;',
+     "lexer", "Unexpected character ]"),
+
+    (132, "Double dollar sign ($$) in variable name",
+     'Bilang $$x dutokan-> 5;',
+     "lexer", "Unexpected character $"),
+
+    (133, "Unicode special character in source",
+     'Bilang x dutokan-> 10 \u00a9 5;',
+     "lexer", "Unexpected character"),
+
+    (134, "Multiple invalid characters in one line",
+     'Bilang x dutokan-> @#$;',
+     "lexer", "Unexpected character @ (first invalid char stops lexer)"),
+
+    (135, "Semicolon-like character (Greek question mark)",
+     'Bilang x dutokan-> 10\u037e',
+     "lexer", "Unexpected character (looks like ; but is not)"),
+
+    (136, "Plus-equals (+=) is not a valid operator",
+     'Bilang x dutokan-> 10;\nx += 5;',
+     "lexer", "Unexpected character = after +"),
+
+    (137, "Arrow (->) without dutokan prefix",
+     'Bilang x -> 10;',
+     "parser", "- is MINUS, > is GT — parsed as invalid expression context"),
+
+    (138, "Double string literal (missing operator between)",
+     'Sarsarita x dutokan-> "hello" "world";',
+     "parser", "Two string literals without operator"),
+
+    (139, "Empty source code",
+     '',
+     "valid", "Empty program is valid (no statements)"),
+
+    (140, "Only whitespace and newlines",
+     '   \n  \n   ',
+     "valid", "Whitespace-only program is valid"),
 ]
 
 
@@ -969,17 +1092,23 @@ def generate_pdf(results, output_path):
         f"Total: {total}",
         f"Passed: {passed}",
         f"Failed: {failed}",
-        f"Valid Code: {sum(1 for r in results if r['expected_phase']=='valid')}",
-        f"Syntax Errors: {sum(1 for r in results if r['expected_phase'] in ('lexer','parser'))}",
-        f"Semantic Errors: {sum(1 for r in results if r['expected_phase']=='semantic')}",
+        f"Valid: {sum(1 for r in results if r['expected_phase']=='valid')}",
+        f"Lexer: {sum(1 for r in results if r['expected_phase']=='lexer')}",
+        f"Parser: {sum(1 for r in results if r['expected_phase']=='parser')}",
+        f"Semantic: {sum(1 for r in results if r['expected_phase']=='semantic')}",
     ]
     pdf.cell(0, 7, '  |  '.join(stats), fill=True, new_x="LMARGIN", new_y="NEXT")
     pdf.ln(6)
 
+    def safe(text):
+        """Make text safe for latin-1 PDF encoding."""
+        return text.encode('latin-1', 'replace').decode('latin-1')
+
     sections = [
         ("SECTION A: VALID CODE", [r for r in results if r["expected_phase"] == "valid"]),
-        ("SECTION B: SYNTAX ERRORS", [r for r in results if r["expected_phase"] in ("lexer", "parser")]),
+        ("SECTION B: SYNTAX ERRORS (PARSER)", [r for r in results if r["expected_phase"] == "parser"]),
         ("SECTION C: SEMANTIC ERRORS", [r for r in results if r["expected_phase"] == "semantic"]),
+        ("SECTION D: LEXICAL ERRORS", [r for r in results if r["expected_phase"] == "lexer"]),
     ]
 
     for section_title, section_results in sections:
@@ -1008,7 +1137,7 @@ def generate_pdf(results, output_path):
                 pdf.set_fill_color(254, 226, 226)
 
             pdf.cell(0, 6,
-                     f"#{r['id']}  {r['title']}  [{phase}] [{status}]",
+                     safe(f"#{r['id']}  {r['title']}  [{phase}] [{status}]"),
                      fill=True, new_x="LMARGIN", new_y="NEXT")
 
             # Code
@@ -1017,13 +1146,12 @@ def generate_pdf(results, output_path):
             pdf.set_fill_color(245, 245, 245)
             code_lines = r["code"].split("\n")
             for line in code_lines:
-                safe_line = line.encode('latin-1', 'replace').decode('latin-1')
-                pdf.cell(0, 4, f"  {safe_line}", fill=True, new_x="LMARGIN", new_y="NEXT")
+                pdf.cell(0, 4, safe(f"  {line}"), fill=True, new_x="LMARGIN", new_y="NEXT")
 
             # Expected
             pdf.set_font('Helvetica', '', 7.5)
             pdf.set_text_color(100, 100, 100)
-            pdf.cell(0, 5, f"  Expected: {r['expected_outcome']}", new_x="LMARGIN", new_y="NEXT")
+            pdf.cell(0, 5, safe(f"  Expected: {r['expected_outcome']}"), new_x="LMARGIN", new_y="NEXT")
 
             # Actual
             if r["actual_phase"] == "valid":
@@ -1032,11 +1160,10 @@ def generate_pdf(results, output_path):
                 pdf.set_text_color(194, 65, 12)
 
             actual_text = (r["actual_result"] or "N/A")
-            safe_actual = actual_text.encode('latin-1', 'replace').decode('latin-1')
-            # Truncate if too long
+            safe_actual = safe(actual_text)
             if len(safe_actual) > 120:
                 safe_actual = safe_actual[:117] + "..."
-            pdf.cell(0, 5, f"  Actual: {safe_actual}", new_x="LMARGIN", new_y="NEXT")
+            pdf.cell(0, 5, safe(f"  Actual: {safe_actual}"), new_x="LMARGIN", new_y="NEXT")
 
             # Symbol table summary for valid scenarios
             if r.get("symbol_table"):
@@ -1063,7 +1190,8 @@ def main():
         status = "PASS" if result["passed"] else "FAIL"
         phase = (result["actual_phase"] or "?").upper()
         icon = "+" if result["passed"] else "X"
-        print(f"  [{icon}] #{sid:3d} [{phase:8s}] [{status}] {title}")
+        safe_title = title.encode('ascii', 'replace').decode('ascii')
+        print(f"  [{icon}] #{sid:3d} [{phase:8s}] [{status}] {safe_title}")
 
     print()
     total = len(results)

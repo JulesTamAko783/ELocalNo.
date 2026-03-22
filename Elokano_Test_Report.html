@@ -259,25 +259,25 @@ summary {
 <div class="container">
     <div class="header">
         <h1>ELOKANO TEST SCENARIOS REPORT</h1>
-        <p class="subtitle">Automated Testing of Lexer, Parser, and Semantic Analyzer &mdash; March 22, 2026 02:11 PM</p>
+        <p class="subtitle">Automated Testing of Lexer, Parser, and Semantic Analyzer &mdash; March 22, 2026 02:45 PM</p>
         <div class="progress-bar"><div class="progress-fill" style="width:100.0%"></div></div>
     </div>
 
     <div class="stats">
-        <div class="stat-box stat-total"><div class="stat-num">110</div><div class="stat-label">Total</div></div>
-        <div class="stat-box stat-pass"><div class="stat-num">110</div><div class="stat-label">Passed</div></div>
+        <div class="stat-box stat-total"><div class="stat-num">140</div><div class="stat-label">Total</div></div>
+        <div class="stat-box stat-pass"><div class="stat-num">140</div><div class="stat-label">Passed</div></div>
         <div class="stat-box stat-fail"><div class="stat-num">0</div><div class="stat-label">Failed</div></div>
-        <div class="stat-box stat-valid"><div class="stat-num">41</div><div class="stat-label">Valid Code</div></div>
-        <div class="stat-box stat-syntax"><div class="stat-num">28</div><div class="stat-label">Syntax Errors</div></div>
+        <div class="stat-box stat-valid"><div class="stat-num">43</div><div class="stat-label">Valid Code</div></div>
+        <div class="stat-box stat-syntax"><div class="stat-num">56</div><div class="stat-label">Syntax Errors</div></div>
         <div class="stat-box stat-semantic"><div class="stat-num">41</div><div class="stat-label">Semantic Errors</div></div>
     </div>
 
     <div class="filter-bar">
-        <button class="filter-btn active" onclick="filterCards('all')">All (110)</button>
-        <button class="filter-btn" onclick="filterCards('valid')">Valid (41)</button>
-        <button class="filter-btn" onclick="filterCards('syntax')">Syntax Errors (28)</button>
+        <button class="filter-btn active" onclick="filterCards('all')">All (140)</button>
+        <button class="filter-btn" onclick="filterCards('valid')">Valid (43)</button>
+        <button class="filter-btn" onclick="filterCards('syntax')">Syntax Errors (56)</button>
         <button class="filter-btn" onclick="filterCards('semantic')">Semantic Errors (41)</button>
-        <button class="filter-btn" onclick="filterCards('pass')">Passed (110)</button>
+        <button class="filter-btn" onclick="filterCards('pass')">Passed (140)</button>
         <button class="filter-btn" onclick="filterCards('fail')">Failed (0)</button>
     </div>
 
@@ -1485,6 +1485,60 @@ sabali {
         <table class="mini-table"><tr><th>Name</th><th>Type</th><th>Scope</th><th>Offset</th><th>Weight</th><th>Location</th></tr><tr><td>x</td><td>Bilang</td><td>Level 0 (Global)</td><td>0</td><td>4</td><td>1:1</td></tr></table></details>
                 </div>
             </div>
+            <div class="card section-valid card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#139</span>
+                        Empty source code
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#a6e3a1;color:#1e1e2e">VALID</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre></pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">Empty program is valid (no statements)</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="success-msg">All phases passed successfully</div>
+                    </div>
+                    <details><summary>Tokens (1)</summary>
+        <table class="mini-table"><tr><th>Type</th><th>Value</th><th>Line</th><th>Col</th></tr><tr><td>EOF</td><td></td><td>1</td><td>1</td></tr></table></details>
+                    
+                </div>
+            </div>
+            <div class="card section-valid card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#140</span>
+                        Only whitespace and newlines
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#a6e3a1;color:#1e1e2e">VALID</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre>   
+  
+   </pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">Whitespace-only program is valid</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="success-msg">All phases passed successfully</div>
+                    </div>
+                    <details><summary>Tokens (1)</summary>
+        <table class="mini-table"><tr><th>Type</th><th>Value</th><th>Line</th><th>Col</th></tr><tr><td>EOF</td><td></td><td>3</td><td>1</td></tr></table></details>
+                    
+                </div>
+            </div>
         </div>
     <div class="section">
             <h2 class="section-title">Section B: Syntax Errors (Scenarios 41-70)</h2>
@@ -2245,6 +2299,710 @@ nu (x &gt; 5) {
                     </div>
                     <details><summary>Tokens (5)</summary>
         <table class="mini-table"><tr><th>Type</th><th>Value</th><th>Line</th><th>Col</th></tr><tr><td>INT_LIT</td><td>10</td><td>1</td><td>1</td></tr><tr><td>ASSIGN</td><td>dutokan-&gt;</td><td>1</td><td>4</td></tr><tr><td>IDENT</td><td>x</td><td>1</td><td>14</td></tr><tr><td>SEMI</td><td>;</td><td>1</td><td>15</td></tr><tr><td>EOF</td><td></td><td>1</td><td>1</td></tr></table></details>
+                    
+                </div>
+            </div>
+            <div class="card section-syntax card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#111</span>
+                        Hash character (#) is not recognized
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#f38ba8;color:#1e1e2e">LEXER</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre>Bilang x dutokan-&gt; 10;
+# this is not a comment</pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">Unexpected character #</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="error-msg">Unexpected character &#x27;#&#x27; at line 2, column 1</div>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            <div class="card section-syntax card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#112</span>
+                        Dollar sign ($) is not a valid token
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#f38ba8;color:#1e1e2e">LEXER</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre>Bilang $price dutokan-&gt; 100;</pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">Unexpected character $</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="error-msg">Unexpected character &#x27;$&#x27; at line 1, column 8</div>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            <div class="card section-syntax card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#113</span>
+                        Ampersand (&amp;) is not a valid operator
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#f38ba8;color:#1e1e2e">LEXER</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre>Pudno result dutokan-&gt; true &amp; false;</pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">Unexpected character &amp;</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="error-msg">Unexpected character &#x27;&amp;&#x27; at line 1, column 29</div>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            <div class="card section-syntax card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#114</span>
+                        Double ampersand (&amp;&amp;) - no logical AND operator
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#f38ba8;color:#1e1e2e">LEXER</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre>Pudno result dutokan-&gt; true &amp;&amp; false;</pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">Unexpected character &amp;</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="error-msg">Unexpected character &#x27;&amp;&#x27; at line 1, column 29</div>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            <div class="card section-syntax card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#115</span>
+                        Pipe (|) is not a valid operator
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#f38ba8;color:#1e1e2e">LEXER</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre>Pudno result dutokan-&gt; true | false;</pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">Unexpected character |</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="error-msg">Unexpected character &#x27;|&#x27; at line 1, column 29</div>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            <div class="card section-syntax card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#116</span>
+                        Double pipe (||) - no logical OR operator
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#f38ba8;color:#1e1e2e">LEXER</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre>Pudno result dutokan-&gt; true || false;</pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">Unexpected character |</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="error-msg">Unexpected character &#x27;|&#x27; at line 1, column 29</div>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            <div class="card section-syntax card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#117</span>
+                        Tilde (~) is not a valid operator
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#f38ba8;color:#1e1e2e">LEXER</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre>Bilang x dutokan-&gt; ~5;</pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">Unexpected character ~</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="error-msg">Unexpected character &#x27;~&#x27; at line 1, column 20</div>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            <div class="card section-syntax card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#118</span>
+                        Caret (^) is not a valid operator
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#f38ba8;color:#1e1e2e">LEXER</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre>Bilang x dutokan-&gt; 2 ^ 3;</pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">Unexpected character ^</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="error-msg">Unexpected character &#x27;^&#x27; at line 1, column 22</div>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            <div class="card section-syntax card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#119</span>
+                        Backtick (`) is not a valid delimiter
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#f38ba8;color:#1e1e2e">LEXER</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre>Sarsarita s dutokan-&gt; `hello`;</pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">Unexpected character `</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="error-msg">Unexpected character &#x27;`&#x27; at line 1, column 23</div>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            <div class="card section-syntax card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#120</span>
+                        Single quote (&#x27;) is not a valid string delimiter
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#f38ba8;color:#1e1e2e">LEXER</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre>Sarsarita s dutokan-&gt; &#x27;hello&#x27;;</pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">Unexpected character &#x27;</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="error-msg">Unexpected character &quot;&#x27;&quot; at line 1, column 23</div>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            <div class="card section-syntax card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#121</span>
+                        Exclamation mark (!) alone without =
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#f38ba8;color:#1e1e2e">LEXER</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre>Pudno x dutokan-&gt; !true;</pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">Unexpected character !</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="error-msg">Unexpected character &#x27;!&#x27; at line 1, column 19</div>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            <div class="card section-syntax card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#122</span>
+                        Single equals (=) is not an assignment or comparison
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#f38ba8;color:#1e1e2e">LEXER</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre>Bilang x = 10;</pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">Unexpected character =</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="error-msg">Unexpected character &#x27;=&#x27; at line 1, column 10</div>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            <div class="card section-syntax card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#123</span>
+                        Backslash (\) outside of a string literal
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#f38ba8;color:#1e1e2e">LEXER</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre>Bilang x dutokan-&gt; 10\2;</pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">Unexpected character \</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="error-msg">Unexpected character &#x27;\\&#x27; at line 1, column 22</div>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            <div class="card section-syntax card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#124</span>
+                        Question mark (?) is not a valid token
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#f38ba8;color:#1e1e2e">LEXER</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre>Bilang x dutokan-&gt; 5 ? 10;</pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">Unexpected character ?</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="error-msg">Unexpected character &#x27;?&#x27; at line 1, column 22</div>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            <div class="card section-syntax card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#125</span>
+                        Colon (:) is not a valid token
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#f38ba8;color:#1e1e2e">LEXER</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre>Bilang x: 10;</pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">Unexpected character :</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="error-msg">Unexpected character &#x27;:&#x27; at line 1, column 9</div>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            <div class="card section-syntax card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#126</span>
+                        Dot (.) alone is not a valid token
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#f38ba8;color:#1e1e2e">LEXER</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre>Bilang x dutokan-&gt; 10.;</pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">Unexpected character .</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="error-msg">Unexpected character &#x27;.&#x27; at line 1, column 22</div>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            <div class="card section-syntax card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#127</span>
+                        Unterminated string at end of file
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#f38ba8;color:#1e1e2e">LEXER</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre>Sarsarita msg dutokan-&gt; &quot;hello</pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">Unterminated string at end of file</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="error-msg">Unexpected character &#x27;&quot;&#x27; at line 1, column 25</div>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            <div class="card section-syntax card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#128</span>
+                        Unterminated string with escape at end
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#f38ba8;color:#1e1e2e">LEXER</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre>Sarsarita msg dutokan-&gt; &quot;hello\</pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">Unterminated string</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="error-msg">Unexpected character &#x27;&quot;&#x27; at line 1, column 25</div>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            <div class="card section-syntax card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#129</span>
+                        At sign (@) in an expression
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#f38ba8;color:#1e1e2e">LEXER</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre>Bilang x dutokan-&gt; 5 @ 3;</pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">Unexpected character @</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="error-msg">Unexpected character &#x27;@&#x27; at line 1, column 22</div>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            <div class="card section-syntax card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#130</span>
+                        Square bracket ([) is not a valid delimiter
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#f38ba8;color:#1e1e2e">LEXER</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre>Bilang x dutokan-&gt; [10];</pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">Unexpected character [</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="error-msg">Unexpected character &#x27;[&#x27; at line 1, column 20</div>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            <div class="card section-syntax card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#131</span>
+                        Square bracket (]) is not a valid delimiter
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#f38ba8;color:#1e1e2e">LEXER</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre>Bilang arr] dutokan-&gt; 10;</pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">Unexpected character ]</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="error-msg">Unexpected character &#x27;]&#x27; at line 1, column 11</div>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            <div class="card section-syntax card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#132</span>
+                        Double dollar sign ($$) in variable name
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#f38ba8;color:#1e1e2e">LEXER</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre>Bilang $$x dutokan-&gt; 5;</pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">Unexpected character $</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="error-msg">Unexpected character &#x27;$&#x27; at line 1, column 8</div>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            <div class="card section-syntax card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#133</span>
+                        Unicode special character in source
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#f38ba8;color:#1e1e2e">LEXER</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre>Bilang x dutokan-&gt; 10 © 5;</pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">Unexpected character</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="error-msg">Unexpected character &#x27;©&#x27; at line 1, column 23</div>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            <div class="card section-syntax card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#134</span>
+                        Multiple invalid characters in one line
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#f38ba8;color:#1e1e2e">LEXER</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre>Bilang x dutokan-&gt; @#$;</pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">Unexpected character @ (first invalid char stops lexer)</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="error-msg">Unexpected character &#x27;@&#x27; at line 1, column 20</div>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            <div class="card section-syntax card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#135</span>
+                        Semicolon-like character (Greek question mark)
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#f38ba8;color:#1e1e2e">LEXER</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre>Bilang x dutokan-&gt; 10;</pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">Unexpected character (looks like ; but is not)</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="error-msg">Unexpected character &#x27;;&#x27; at line 1, column 22</div>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            <div class="card section-syntax card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#136</span>
+                        Plus-equals (+=) is not a valid operator
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#f38ba8;color:#1e1e2e">LEXER</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre>Bilang x dutokan-&gt; 10;
+x += 5;</pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">Unexpected character = after +</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="error-msg">Unexpected character &#x27;=&#x27; at line 2, column 4</div>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            <div class="card section-syntax card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#137</span>
+                        Arrow (-&gt;) without dutokan prefix
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#fab387;color:#1e1e2e">PARSER</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre>Bilang x -&gt; 10;</pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">- is MINUS, &gt; is GT — parsed as invalid expression context</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="error-msg">Expected SEMI, got MINUS (&#x27;-&#x27;) at line 1, column 10</div>
+                    </div>
+                    <details><summary>Tokens (7)</summary>
+        <table class="mini-table"><tr><th>Type</th><th>Value</th><th>Line</th><th>Col</th></tr><tr><td>TYPE_INT</td><td>Bilang</td><td>1</td><td>1</td></tr><tr><td>IDENT</td><td>x</td><td>1</td><td>8</td></tr><tr><td>MINUS</td><td>-</td><td>1</td><td>10</td></tr><tr><td>GT</td><td>&gt;</td><td>1</td><td>11</td></tr><tr><td>INT_LIT</td><td>10</td><td>1</td><td>13</td></tr><tr><td>SEMI</td><td>;</td><td>1</td><td>15</td></tr><tr><td>EOF</td><td></td><td>1</td><td>1</td></tr></table></details>
+                    
+                </div>
+            </div>
+            <div class="card section-syntax card-pass">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="scenario-num">#138</span>
+                        Double string literal (missing operator between)
+                    </div>
+                    <div class="card-badges">
+                        <span class="phase-badge" style="background:#fab387;color:#1e1e2e">PARSER</span>
+                        <span class="badge pass">PASS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="code-block"><pre>Sarsarita x dutokan-&gt; &quot;hello&quot; &quot;world&quot;;</pre></div>
+                    <div class="result-row">
+                        <div class="result-label">Expected:</div>
+                        <div class="result-value">Two string literals without operator</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Actual:</div>
+                        <div class="error-msg">Expected SEMI, got STRING_LIT (&#x27;&quot;world&quot;&#x27;) at line 1, column 31</div>
+                    </div>
+                    <details><summary>Tokens (7)</summary>
+        <table class="mini-table"><tr><th>Type</th><th>Value</th><th>Line</th><th>Col</th></tr><tr><td>TYPE_STRING</td><td>Sarsarita</td><td>1</td><td>1</td></tr><tr><td>IDENT</td><td>x</td><td>1</td><td>11</td></tr><tr><td>ASSIGN</td><td>dutokan-&gt;</td><td>1</td><td>13</td></tr><tr><td>STRING_LIT</td><td>&quot;hello&quot;</td><td>1</td><td>23</td></tr><tr><td>STRING_LIT</td><td>&quot;world&quot;</td><td>1</td><td>31</td></tr><tr><td>SEMI</td><td>;</td><td>1</td><td>38</td></tr><tr><td>EOF</td><td></td><td>1</td><td>1</td></tr></table></details>
                     
                 </div>
             </div>
