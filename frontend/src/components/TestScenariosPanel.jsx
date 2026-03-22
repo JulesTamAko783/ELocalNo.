@@ -197,11 +197,10 @@ export default function TestScenariosPanel({ onLoadInEditor }) {
   const filtered = useMemo(() => {
     let list = results;
     if (filter === 'valid') list = list.filter(r => r.scenario.expectedPhase === 'valid');
+    else if (filter === 'failed') list = list.filter(r => r.scenario.expectedPhase !== 'valid');
     else if (filter === 'lexer') list = list.filter(r => r.scenario.expectedPhase === 'lexer');
     else if (filter === 'parser') list = list.filter(r => r.scenario.expectedPhase === 'parser');
     else if (filter === 'semantic') list = list.filter(r => r.scenario.expectedPhase === 'semantic');
-    else if (filter === 'pass') list = list.filter(r => r.result.passed);
-    else if (filter === 'fail') list = list.filter(r => !r.result.passed);
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -218,14 +217,14 @@ export default function TestScenariosPanel({ onLoadInEditor }) {
     if (onLoadInEditor) onLoadInEditor(code);
   }, [onLoadInEditor]);
 
+  const failedCount = lexerCount + parserCount + semanticCount;
   const filters = [
     { id: 'all', label: `All (${total})` },
     { id: 'valid', label: `Valid (${validCount})` },
-    { id: 'lexer', label: `Lexer Errors (${lexerCount})` },
-    { id: 'parser', label: `Parser Errors (${parserCount})` },
-    { id: 'semantic', label: `Semantic Errors (${semanticCount})` },
-    { id: 'pass', label: `Passed (${passed})` },
-    { id: 'fail', label: `Failed (${failed})` },
+    { id: 'failed', label: `Failed (${failedCount})` },
+    { id: 'lexer', label: `Lexer (${lexerCount})` },
+    { id: 'parser', label: `Parser (${parserCount})` },
+    { id: 'semantic', label: `Semantic (${semanticCount})` },
   ];
 
   return (
