@@ -6,6 +6,7 @@ import ParserPanel from './components/ParserPanel';
 import SemanticPanel from './components/SemanticPanel';
 import OutputPanel from './components/OutputPanel';
 import ReadmeViewer from './components/ReadmeViewer';
+import TestScenariosPanel from './components/TestScenariosPanel';
 import { tokenize } from './lib/lexer';
 import { parse } from './lib/parser';
 import { analyze } from './lib/semantic';
@@ -152,12 +153,30 @@ export default function App() {
     { id: 'semantic', label: 'Semantic', icon: '\u26F0' },
   ];
 
+  // Load code from test scenario into editor
+  const handleLoadFromScenario = useCallback((scenarioCode) => {
+    setCode(scenarioCode);
+    setCurrentView('editor');
+  }, []);
+
   // About page
   if (currentView === 'about') {
     return (
       <div className="app-shell">
         <Navbar currentView={currentView} onViewChange={setCurrentView} />
         <ReadmeViewer />
+      </div>
+    );
+  }
+
+  // Test Scenarios page
+  if (currentView === 'scenarios') {
+    return (
+      <div className="app-shell">
+        <Navbar currentView={currentView} onViewChange={setCurrentView} />
+        <div style={{ flex: 1, overflow: 'auto' }}>
+          <TestScenariosPanel onLoadInEditor={handleLoadFromScenario} />
+        </div>
       </div>
     );
   }

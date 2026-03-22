@@ -13,3 +13,8 @@ generated_target.exe
 frontend/node_modules/
 frontend/dist/
 frontend/.vite/
+
+# Documentation outputs
+*.pdf
+*.docx
+Test_Scenarios.txt

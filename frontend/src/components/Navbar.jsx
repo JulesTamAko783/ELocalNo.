@@ -55,6 +55,7 @@ export default function Navbar({ currentView, onViewChange }) {
 
   const links = [
     { id: 'editor', label: 'Editor', icon: '\u270E' },
+    { id: 'scenarios', label: 'Test Scenarios', icon: '\uD83E\uDDEA' },
     { id: 'about', label: 'About the Language', icon: '\u26F0' },
   ];
 
