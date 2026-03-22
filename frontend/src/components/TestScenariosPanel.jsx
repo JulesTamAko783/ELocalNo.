@@ -4,15 +4,10 @@ import { parse } from '../lib/parser';
 import { analyze } from '../lib/semantic';
 import SCENARIOS from '../data/scenarios';
 
-/**
- * Runs a single scenario through lexer → parser → semantic.
- * Returns { passed, actualPhase, actualResult, tokens, symbolTable }.
- */
 function runScenario(scenario) {
   const { code, expectedPhase } = scenario;
   const result = { passed: false, actualPhase: null, actualResult: null, tokens: null, symbolTable: null };
 
-  // Phase 1: Lexer
   const lexResult = tokenize(code);
   if (lexResult.error) {
     result.actualPhase = 'lexer';
@@ -22,7 +17,6 @@ function runScenario(scenario) {
   }
   result.tokens = lexResult.tokens;
 
-  // Phase 2: Parser
   const parseResult = parse(lexResult.tokens);
   if (parseResult.error) {
     result.actualPhase = 'parser';
@@ -31,7 +25,6 @@ function runScenario(scenario) {
     return result;
   }
 
-  // Phase 3: Semantic
   const semResult = analyze(parseResult.ast);
   if (semResult.errors && semResult.errors.length > 0) {
     result.actualPhase = 'semantic';
@@ -47,38 +40,25 @@ function runScenario(scenario) {
   return result;
 }
 
-const PHASE_STYLES = {
-  valid:    { bg: 'var(--color-terraces)', text: '#fff' },
-  lexer:   { bg: '#C0392B', text: '#fff' },
-  parser:  { bg: 'var(--color-clay)', text: '#fff' },
-  semantic:{ bg: 'var(--color-basi)', text: '#fff' },
+const PHASE_CONFIG = {
+  valid:    { label: 'VALID',    bg: 'bg-terraces',  border: 'border-terraces' },
+  lexer:   { label: 'LEXER',    bg: 'bg-[#C0392B]', border: 'border-[#C0392B]' },
+  parser:  { label: 'PARSER',   bg: 'bg-clay',       border: 'border-clay' },
+  semantic:{ label: 'SEMANTIC', bg: 'bg-basi',       border: 'border-basi' },
 };
 
 function PhaseBadge({ phase }) {
-  const s = PHASE_STYLES[phase] || { bg: 'var(--color-stone)', text: '#fff' };
+  const cfg = PHASE_CONFIG[phase] || { label: '?', bg: 'bg-stone_wall', border: 'border-stone_wall' };
   return (
-    <span style={{
-      background: s.bg, color: s.text,
-      padding: '2px 8px', borderRadius: '3px',
-      fontSize: '0.65rem', fontWeight: 700,
-      letterSpacing: '0.5px', textTransform: 'uppercase',
-      fontFamily: "'Fira Code', monospace",
-    }}>
-      {phase}
+    <span className={`${cfg.bg} text-parchment px-2 py-0.5 rounded-sm text-[0.6rem] font-bold tracking-wider uppercase mono`}>
+      {cfg.label}
     </span>
   );
 }
 
 function StatusBadge({ passed }) {
   return (
-    <span style={{
-      background: passed ? 'var(--color-terraces)' : '#C0392B',
-      color: '#fff',
-      padding: '2px 10px', borderRadius: '3px',
-      fontSize: '0.65rem', fontWeight: 700,
-      letterSpacing: '0.5px',
-      fontFamily: "'Fira Code', monospace",
-    }}>
+    <span className={`${passed ? 'bg-terraces' : 'bg-[#C0392B]'} text-parchment px-2.5 py-0.5 rounded-sm text-[0.6rem] font-bold tracking-wider mono`}>
       {passed ? 'PASS' : 'FAIL'}
     </span>
   );
@@ -88,81 +68,58 @@ function ScenarioCard({ scenario, result, onLoadInEditor }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div style={{
-      background: 'var(--color-parchment)',
-      border: `1.5px solid var(--color-stone)`,
-      borderLeft: `4px solid ${result.passed ? 'var(--color-terraces)' : '#C0392B'}`,
-      borderRadius: '4px',
-      marginBottom: '8px',
-      boxShadow: 'inset 0 1px 3px rgba(44,24,16,0.06)',
-    }}>
-      {/* Header */}
+    <div className={`
+      bg-parchment border border-stone_wall rounded-sm mb-2 overflow-hidden
+      border-l-4 ${result.passed ? 'border-l-terraces' : 'border-l-[#C0392B]'}
+      shadow-[inset_0_1px_3px_rgba(44,24,16,0.06)]
+    `}>
+      {/* Header — clickable */}
       <div
         onClick={() => setExpanded(!expanded)}
-        style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          padding: '10px 14px',
-          background: 'var(--color-limestone)',
-          cursor: 'pointer',
-          flexWrap: 'wrap', gap: '6px',
-          borderBottom: expanded ? '1px solid var(--color-stone)' : 'none',
-        }}
+        className={`
+          flex justify-between items-center px-3.5 py-2.5
+          bg-limestone cursor-pointer flex-wrap gap-1.5
+          ${expanded ? 'border-b border-stone_wall' : ''}
+        `}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
-          <span style={{
-            color: 'var(--color-clay)', fontFamily: "'Fira Code', monospace",
-            fontSize: '0.8rem', fontWeight: 700, flexShrink: 0,
-          }}>
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <span className="mono text-clay text-xs font-bold shrink-0">
             #{scenario.id}
           </span>
-          <span style={{
-            fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-ink)',
-            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-          }}>
+          <span className="text-sm font-semibold text-ink truncate font-['Lora',serif]">
             {scenario.title}
           </span>
         </div>
-        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}>
+        <div className="flex gap-1.5 items-center shrink-0">
           <PhaseBadge phase={result.actualPhase || '?'} />
           <StatusBadge passed={result.passed} />
-          <span style={{ fontSize: '0.7rem', color: 'var(--color-stone)', marginLeft: '4px' }}>
+          <span className="text-[0.65rem] text-stone_wall ml-1">
             {expanded ? '\u25B2' : '\u25BC'}
           </span>
         </div>
       </div>
 
-      {/* Body */}
+      {/* Expanded body */}
       {expanded && (
-        <div style={{ padding: '12px 14px' }}>
-          {/* Code */}
-          <pre style={{
-            background: 'var(--bg-editor)',
-            color: 'var(--color-terraces)',
-            padding: '10px 14px',
-            borderRadius: '3px',
-            fontSize: '0.78rem',
-            fontFamily: "'Fira Code', monospace",
-            overflow: 'auto',
-            whiteSpace: 'pre-wrap',
-            wordBreak: 'break-word',
-            marginBottom: '10px',
-            border: '1px solid var(--color-stone)',
-          }}>
+        <div className="px-3.5 py-3 inabel-bg">
+          {/* Code block */}
+          <pre className="bg-[#1A0F0A] text-terraces p-3 rounded-sm text-[0.78rem] mono overflow-auto whitespace-pre-wrap break-words mb-3 border border-stone_wall">
             {scenario.code}
           </pre>
 
-          <div style={{ fontSize: '0.82rem', lineHeight: 1.7 }}>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <span style={{ fontWeight: 700, color: 'var(--color-stone)', minWidth: '70px' }}>Expected:</span>
-              <span style={{ color: 'var(--color-soil)' }}>{scenario.expectedOutcome}</span>
+          {/* Expected / Actual */}
+          <div className="text-sm leading-7 font-['Lora',serif]">
+            <div className="flex gap-2">
+              <span className="font-bold text-stone_wall min-w-[70px] font-['Libre_Baskerville',serif]">Expected:</span>
+              <span className="text-soil">{scenario.expectedOutcome}</span>
             </div>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <span style={{ fontWeight: 700, color: 'var(--color-stone)', minWidth: '70px' }}>Actual:</span>
-              <span style={{
-                color: result.actualPhase === 'valid' ? 'var(--color-terraces)' : 'var(--color-clay)',
-                fontFamily: result.actualPhase !== 'valid' ? "'Fira Code', monospace" : 'inherit',
-                fontSize: result.actualPhase !== 'valid' ? '0.78rem' : 'inherit',
-              }}>
+            <div className="flex gap-2">
+              <span className="font-bold text-stone_wall min-w-[70px] font-['Libre_Baskerville',serif]">Actual:</span>
+              <span className={
+                result.actualPhase === 'valid'
+                  ? 'text-terraces'
+                  : 'text-clay mono text-[0.78rem]'
+              }>
                 {result.actualResult}
               </span>
             </div>
@@ -170,44 +127,36 @@ function ScenarioCard({ scenario, result, onLoadInEditor }) {
 
           {/* Token count */}
           {result.tokens && (
-            <div style={{ marginTop: '8px', fontSize: '0.75rem', color: 'var(--color-harvest)' }}>
+            <div className="mt-2 text-xs text-harvest font-['Lora',serif]">
               Tokens: {result.tokens.length}
             </div>
           )}
 
           {/* Symbol table */}
           {result.symbolTable && result.symbolTable.length > 0 && (
-            <details style={{ marginTop: '8px' }}>
-              <summary style={{
-                cursor: 'pointer', color: 'var(--color-basi)',
-                fontSize: '0.78rem', fontWeight: 600,
-              }}>
+            <details className="mt-2 border-t border-stone_wall pt-2">
+              <summary className="cursor-pointer text-basi text-xs font-bold font-['Libre_Baskerville',serif]">
                 Symbol Table ({result.symbolTable.length} entries)
               </summary>
-              <div style={{ overflow: 'auto', marginTop: '4px' }}>
-                <table style={{
-                  width: '100%', borderCollapse: 'collapse',
-                  fontSize: '0.72rem', fontFamily: "'Fira Code', monospace",
-                }}>
+              <div className="overflow-auto mt-1">
+                <table className="w-full border-collapse text-[0.7rem] mono">
                   <thead>
-                    <tr style={{ background: 'var(--color-limestone)' }}>
+                    <tr className="bg-limestone">
                       {['Name', 'Type', 'Scope', 'Offset', 'Weight'].map(h => (
-                        <th key={h} style={{
-                          padding: '4px 8px', textAlign: 'left',
-                          borderBottom: '1px solid var(--color-stone)',
-                          color: 'var(--color-basi)', fontWeight: 700,
-                        }}>{h}</th>
+                        <th key={h} className="px-2 py-1 text-left border-b border-stone_wall text-basi font-bold font-['Libre_Baskerville',serif]">
+                          {h}
+                        </th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {result.symbolTable.map((s, i) => (
-                      <tr key={i} style={{ borderBottom: '1px solid rgba(139,115,85,0.2)' }}>
-                        <td style={{ padding: '3px 8px', color: 'var(--color-terraces)' }}>{s.name}</td>
-                        <td style={{ padding: '3px 8px' }}>{s.varType || s.type}</td>
-                        <td style={{ padding: '3px 8px' }}>{s.scope}</td>
-                        <td style={{ padding: '3px 8px' }}>{s.offset}</td>
-                        <td style={{ padding: '3px 8px' }}>{s.weight}</td>
+                      <tr key={i} className="border-b border-stone_wall/20 hover:bg-limestone/50">
+                        <td className="px-2 py-1 text-terraces">{s.name}</td>
+                        <td className="px-2 py-1 text-clay">{s.varType || s.type}</td>
+                        <td className="px-2 py-1">{s.scope}</td>
+                        <td className="px-2 py-1">{s.offset}</td>
+                        <td className="px-2 py-1">{s.weight}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -216,21 +165,10 @@ function ScenarioCard({ scenario, result, onLoadInEditor }) {
             </details>
           )}
 
-          {/* Load in editor button */}
+          {/* Load in editor */}
           <button
             onClick={() => onLoadInEditor(scenario.code)}
-            style={{
-              marginTop: '10px',
-              padding: '5px 14px',
-              fontSize: '0.75rem',
-              fontFamily: "'Libre Baskerville', serif",
-              fontWeight: 700,
-              background: 'var(--color-clay)',
-              color: 'var(--color-parchment)',
-              border: '1px solid var(--color-soil)',
-              borderRadius: '2px',
-              cursor: 'pointer',
-            }}
+            className="btn-run mt-3 px-4 py-1.5 text-xs"
           >
             Load in Editor
           </button>
@@ -244,7 +182,6 @@ export default function TestScenariosPanel({ onLoadInEditor }) {
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Run all scenarios once
   const results = useMemo(() => {
     return SCENARIOS.map(s => ({ scenario: s, result: runScenario(s) }));
   }, []);
@@ -292,127 +229,89 @@ export default function TestScenariosPanel({ onLoadInEditor }) {
   ];
 
   return (
-    <div style={{
-      padding: '24px',
-      maxWidth: '960px',
-      margin: '0 auto',
-      fontFamily: "'Lora', serif",
-    }}>
-      {/* Header */}
-      <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-        <h1 style={{
-          fontFamily: "'Libre Baskerville', serif",
-          fontSize: '1.6rem',
-          color: 'var(--color-basi)',
-          marginBottom: '6px',
-        }}>
+    <div className="max-w-4xl mx-auto px-5 py-6 font-['Lora',serif]">
+
+      {/* ── Header ─────────────────────────────────────────────── */}
+      <div className="text-center mb-6">
+        <h1 className="logo text-2xl text-basi mb-1">
           Test Scenarios
         </h1>
-        <p style={{ color: 'var(--color-stone)', fontSize: '0.85rem' }}>
-          140 automated tests for Lexer, Parser, and Semantic Analyzer
+        <p className="text-stone_wall text-sm font-['Lora',serif]">
+          {total} automated tests for the Elokano compiler pipeline
         </p>
+
+        {/* Inabel divider */}
+        <div className="divider-wave mt-3" aria-hidden="true"></div>
       </div>
 
-      {/* Stats */}
-      <div style={{
-        display: 'flex', gap: '12px', justifyContent: 'center',
-        marginBottom: '20px', flexWrap: 'wrap',
-      }}>
+      {/* ── Stats boxes ────────────────────────────────────────── */}
+      <div className="flex gap-3 justify-center mb-5 flex-wrap">
         {[
-          { label: 'Total', value: total, color: 'var(--color-sky)' },
-          { label: 'Passed', value: passed, color: 'var(--color-terraces)' },
-          { label: 'Failed', value: failed, color: '#C0392B' },
+          { label: 'Total',          value: total,         color: 'text-sky' },
+          { label: 'Nakapasa',       value: validCount,    color: 'text-terraces' },
+          { label: 'Napaay',         value: lexerCount + parserCount + semanticCount, color: 'text-[#C0392B]' },
+          { label: 'Lexer',          value: lexerCount,    color: 'text-[#C0392B]' },
+          { label: 'Parser',         value: parserCount,   color: 'text-clay' },
+          { label: 'Semantic',       value: semanticCount, color: 'text-basi' },
         ].map(s => (
-          <div key={s.label} style={{
-            background: 'var(--color-limestone)',
-            border: '1px solid var(--color-stone)',
-            borderRadius: '6px',
-            padding: '12px 24px',
-            textAlign: 'center',
-            minWidth: '100px',
-          }}>
-            <div style={{ fontSize: '1.6rem', fontWeight: 700, color: s.color, fontFamily: "'Fira Code', monospace" }}>
+          <div key={s.label} className="bg-limestone border border-stone_wall rounded-sm px-5 py-3 text-center min-w-[90px] shadow-[inset_0_1px_3px_rgba(44,24,16,0.08)]">
+            <div className={`text-2xl font-bold ${s.color} mono`}>
               {s.value}
             </div>
-            <div style={{ fontSize: '0.7rem', color: 'var(--color-stone)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+            <div className="text-[0.6rem] text-stone_wall uppercase tracking-widest font-['Libre_Baskerville',serif]">
               {s.label}
             </div>
           </div>
         ))}
       </div>
 
-      {/* Progress bar */}
-      <div style={{
-        width: '100%', height: '6px', background: 'var(--color-limestone)',
-        borderRadius: '3px', marginBottom: '20px', overflow: 'hidden',
-        border: '1px solid var(--color-stone)',
-      }}>
-        <div style={{
-          width: `${(passed / total) * 100}%`,
-          height: '100%',
-          background: 'linear-gradient(90deg, var(--color-terraces), var(--color-sky))',
-          borderRadius: '3px',
-          transition: 'width 0.3s',
-        }} />
-      </div>
-
-      {/* Search */}
-      <div style={{ marginBottom: '12px' }}>
-        <input
-          type="text"
-          placeholder="Search scenarios by title, code, or ID..."
-          value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
+      {/* ── Progress bar (inabel colors) ───────────────────────── */}
+      <div className="w-full h-1.5 bg-limestone rounded-sm mb-5 overflow-hidden border border-stone_wall">
+        <div
+          className="h-full rounded-sm transition-all duration-300"
           style={{
-            width: '100%',
-            padding: '8px 14px',
-            fontSize: '0.85rem',
-            fontFamily: "'Fira Code', monospace",
-            border: '1.5px solid var(--color-stone)',
-            borderRadius: '4px',
-            background: 'var(--color-parchment)',
-            color: 'var(--color-ink)',
-            outline: 'none',
+            width: `${(validCount / total) * 100}%`,
+            background: 'repeating-linear-gradient(90deg, var(--color-terraces) 0px, var(--color-terraces) 8px, var(--color-clay) 8px, var(--color-clay) 16px, var(--color-palay) 16px, var(--color-palay) 24px)',
           }}
         />
       </div>
 
-      {/* Filter bar */}
-      <div style={{
-        display: 'flex', gap: '6px', flexWrap: 'wrap',
-        marginBottom: '20px', justifyContent: 'center',
-      }}>
+      {/* ── Search ─────────────────────────────────────────────── */}
+      <div className="mb-3">
+        <input
+          type="text"
+          placeholder="Agsapul... (Search scenarios)"
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          className="w-full px-3.5 py-2 text-sm mono border-2 border-stone_wall rounded-sm bg-parchment text-ink outline-none focus:border-clay transition-colors placeholder:text-stone_wall/60"
+        />
+      </div>
+
+      {/* ── Filter buttons ─────────────────────────────────────── */}
+      <div className="flex gap-1.5 flex-wrap mb-5 justify-center">
         {filters.map(f => (
           <button
             key={f.id}
             onClick={() => setFilter(f.id)}
-            style={{
-              padding: '6px 14px',
-              fontSize: '0.75rem',
-              fontFamily: "'Libre Baskerville', serif",
-              fontWeight: filter === f.id ? 700 : 400,
-              background: filter === f.id ? 'var(--color-clay)' : 'var(--color-limestone)',
-              color: filter === f.id ? 'var(--color-parchment)' : 'var(--color-soil)',
-              border: `1px solid ${filter === f.id ? 'var(--color-soil)' : 'var(--color-stone)'}`,
-              borderRadius: '3px',
-              cursor: 'pointer',
-              transition: 'all 0.15s',
-            }}
+            className={`
+              tab-btn px-3 py-2 text-[0.7rem] rounded-sm border transition-all
+              ${filter === f.id
+                ? 'bg-clay text-parchment border-soil font-bold shadow-[0_1px_2px_rgba(44,24,16,0.3)]'
+                : 'bg-limestone text-soil border-stone_wall hover:text-clay hover:border-clay'
+              }
+            `}
           >
             {f.label}
           </button>
         ))}
       </div>
 
-      {/* Results count */}
-      <div style={{
-        fontSize: '0.78rem', color: 'var(--color-stone)',
-        marginBottom: '12px', fontStyle: 'italic',
-      }}>
+      {/* ── Results count ──────────────────────────────────────── */}
+      <div className="text-xs text-stone_wall mb-3 italic font-['Lora',serif]">
         Showing {filtered.length} of {total} scenarios
       </div>
 
-      {/* Scenario cards */}
+      {/* ── Scenario cards ─────────────────────────────────────── */}
       {filtered.map(({ scenario, result }) => (
         <ScenarioCard
           key={scenario.id}
@@ -423,13 +322,16 @@ export default function TestScenariosPanel({ onLoadInEditor }) {
       ))}
 
       {filtered.length === 0 && (
-        <div style={{
-          textAlign: 'center', padding: '40px',
-          color: 'var(--color-stone)', fontStyle: 'italic',
-        }}>
-          No scenarios match the current filter.
+        <div className="text-center py-10 text-stone_wall italic font-['Lora',serif]">
+          Awan ti scenario a maipakita. (No scenarios match.)
         </div>
       )}
+
+      {/* Footer divider */}
+      <div className="divider-wave mt-6" aria-hidden="true"></div>
+      <p className="text-center text-[0.7rem] text-stone_wall mt-3 font-['Lora',serif]">
+        Elokano &mdash; Pagsasao ti Ilocos
+      </p>
     </div>
   );
 }
